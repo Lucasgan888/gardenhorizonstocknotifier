@@ -1,18 +1,42 @@
 @import "tailwindcss";
 
-:root {
-  --background: #080d08;
-  --foreground: #f3f4f6;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: #070B10;
+  --color-surface: #11161F;
+  --color-surface-alt: #171E29;
+
+  --color-border-subtle: rgba(255, 255, 255, 0.06);
+  --color-border-strong: rgba(255, 255, 255, 0.12);
+
+  --color-text-primary: #F5F7FA;
+  --color-text-secondary: #A3B1C2;
+  --color-text-muted: #6B7685;
+
+  --color-accent: #4ADE80;
+  --color-accent-soft: rgba(74, 222, 128, 0.16);
+  --color-accent-hover: #22C55E;
+
+  --color-input-bg: #0D1118;
+  --color-input-border: rgba(148, 163, 184, 0.5);
+  --color-input-focus: #4ADE80;
+
+  --color-rarity-common: #9CA3AF;
+  --color-rarity-uncommon: #22C55E;
+  --color-rarity-rare: #3B82F6;
+  --color-rarity-epic: #A855F7;
+  --color-rarity-legendary: #FACC15;
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 4px 10px rgba(0, 0, 0, 0.45);
+  --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.55);
+  --shadow-lg: 0 18px 45px rgba(0, 0, 0, 0.65);
+  --shadow-focus: 0 0 0 1px rgba(74, 222, 128, 0.8);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 body {
-  background-color: var(--background);
-  color: var(--foreground);
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
 }

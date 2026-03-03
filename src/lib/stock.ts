@@ -67,8 +67,29 @@ export const CATEGORY_CONFIG: Record<ItemCategory, { emoji: string; color: strin
   },
 };
 
+const EMOJI_MAP: Record<string, string> = {
+  "Uncommon Egg": "🐣", "Cactus": "🌵", "Tomato": "🍅",
+  "Buttercup": "🌼", "Blueberry": "🫐", "Strawberry": "🍓", "Carrot": "🥕",
+  "Harvest Tool": "🌾", "Favorite Tool": "❤️", "Pet Name Reroller": "📛",
+  "Pet Lead": "🦮", "Recall Wrench": "🔧", "Trowel": "🛠️", "Trading Ticket": "🎫", "Watering Can": "🚿",
+  "Beach Crate": "🏖️", "Summer Fun Crate": "🏄", "Cooking Kit": "🍳",
+  "Stone Lantern": "🏮", "Viney Beam": "🌿", "Hay Bale": "🌾", "Brick Stack": "🧱",
+  "Torch": "🔥", "White Bench": "🪑", "Safari Seed Pack": "🦁",
+  "Zebra Whistle": "🦓", "Ancestral Horn": "📯", "Orange Delight": "🍊", "Gecko": "🦎",
+  "Fall Egg": "🍂", "Rake": "🧹", "Fall Seed Pack": "🍁", "Chipmunk": "🐿️",
+  "Maple Crate": "📦", "Fall Crate": "🎁", "Golden Watering Can": "🥇",
+  "Golden Sunflower Seeds": "🌻", "Weather Machine": "🌦️", "Lucky Clover": "🍀"
+};
+
 function mapItems(items: { name: string; quantity: number; emoji: string }[], category: ItemCategory): StockItem[] {
-  return items.map((item) => ({ ...item, category }));
+  return items.map((item) => {
+    // Override the generic '❓' or provide one if missing
+    let finalEmoji = item.emoji;
+    if (finalEmoji === "❓" || !finalEmoji) {
+      finalEmoji = EMOJI_MAP[item.name] || "📦";
+    }
+    return { ...item, emoji: finalEmoji, category };
+  });
 }
 
 export async function fetchGardenStock(): Promise<GardenStock> {

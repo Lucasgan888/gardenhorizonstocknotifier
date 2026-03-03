@@ -78,6 +78,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <p className="font-semibold text-gray-500 mb-3 text-xs uppercase tracking-wider">Quick Links</p>
                 <ul className="space-y-2 text-xs">
                   <li><a href="/" className="hover:text-green-400 transition">🏠 Live Stock</a></li>
+                  <li><a href="/beginner-guide" className="hover:text-green-400 transition">📚 Guides</a></li>
+                  <li><a href="/blog" className="hover:text-green-400 transition">📝 Blog</a></li>
                   <li><a href="/about" className="hover:text-green-400 transition">ℹ️ About</a></li>
                   <li><a href="/privacy" className="hover:text-green-400 transition">🔒 Privacy Policy</a></li>
                   <li><a href="/terms" className="hover:text-green-400 transition">📄 Terms of Service</a></li>
