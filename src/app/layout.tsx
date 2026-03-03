@@ -46,36 +46,75 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
       </head>
-      <body className="bg-gray-950 text-gray-100 min-h-screen antialiased">
-        <nav className="border-b border-gray-800 bg-gray-950/80 backdrop-blur-sm sticky top-0 z-50">
+      <body className="bg-[#080d08] text-gray-100 min-h-screen antialiased">
+        <nav className="border-b border-white/5 bg-[#080d08]/80 backdrop-blur-sm sticky top-0 z-50">
           <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
             <a href="/" className="flex items-center gap-2">
               <span className="text-2xl">🌱</span>
               <span className="font-bold text-lg text-green-500">Garden Horizons Stock Notifier</span>
             </a>
-            <div className="flex gap-4 text-sm text-gray-400">
+            <div className="flex gap-4 text-sm text-gray-500">
               <a href="/" className="hover:text-green-500 transition">Live Stock</a>
               <a href="/about" className="hover:text-green-500 transition">About</a>
             </div>
           </div>
         </nav>
         <main>{children}</main>
-        <footer className="border-t border-gray-800 mt-16 py-8 text-center text-sm text-gray-500">
+        <footer className="border-t border-white/5 mt-16 py-10 text-sm text-gray-600 bg-black/20">
           <div className="max-w-6xl mx-auto px-4">
-            <div className="mb-6 p-4 border border-dashed border-gray-700 rounded text-gray-600 text-xs">
-              Advertisement Space
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 mb-8">
+              {/* Brand */}
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-2xl">🌱</span>
+                  <span className="font-bold text-green-500 text-base leading-tight">Garden Horizons<br />Stock Notifier</span>
+                </div>
+                <p className="text-xs text-gray-700 leading-5">
+                  Free real-time Grow a Garden stock tracker. Never miss seeds, gear, eggs, or honey again.
+                </p>
+              </div>
+              {/* Quick links */}
+              <div>
+                <p className="font-semibold text-gray-500 mb-3 text-xs uppercase tracking-wider">Quick Links</p>
+                <ul className="space-y-2 text-xs">
+                  <li><a href="/" className="hover:text-green-400 transition">🏠 Live Stock</a></li>
+                  <li><a href="/about" className="hover:text-green-400 transition">ℹ️ About</a></li>
+                  <li><a href="/privacy" className="hover:text-green-400 transition">🔒 Privacy Policy</a></li>
+                  <li><a href="/terms" className="hover:text-green-400 transition">📄 Terms of Service</a></li>
+                </ul>
+              </div>
+              {/* Data source */}
+              <div>
+                <p className="font-semibold text-gray-500 mb-3 text-xs uppercase tracking-wider">Data Source</p>
+                <p className="text-xs leading-5 text-gray-700">
+                  Stock data provided by{" "}
+                  <a
+                    href="https://gagstock.gleeze.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-green-700 hover:text-green-500 transition underline underline-offset-2"
+                  >
+                    GAG Stock API
+                  </a>
+                  , auto-refreshed every 30 seconds.
+                </p>
+                <p className="text-xs mt-2 text-gray-800">
+                  Unofficial fan-made tool. Not affiliated with Roblox Corporation or the game developers.
+                </p>
+              </div>
             </div>
-            <p>© {new Date().getFullYear()} Garden Horizons Stock Notifier. All rights reserved.</p>
-            <div className="flex justify-center gap-4 mt-2">
-              <a href="/privacy" className="hover:text-green-500 transition">Privacy</a>
-              <a href="/terms" className="hover:text-green-500 transition">Terms</a>
+            {/* Bottom bar */}
+            <div className="border-t border-white/5 pt-5 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-gray-800">
+              <p>© {new Date().getFullYear()} Garden Horizons Stock Notifier. All rights reserved.</p>
+              <div className="flex gap-4">
+                <a href="/privacy" className="hover:text-gray-500 transition">Privacy</a>
+                <a href="/terms" className="hover:text-gray-500 transition">Terms</a>
+              </div>
             </div>
-            <p className="mt-2 text-gray-600 text-xs">
-              Not affiliated with Roblox Corporation or Garden Horizons developers.
-            </p>
           </div>
         </footer>
       </body>
+
     </html>
   );
 }
