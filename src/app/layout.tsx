@@ -12,6 +12,14 @@ export const metadata: Metadata = {
     description: "Track Garden Horizons item stock in real-time. Free live inventory updates every 5 minutes.",
     url: "https://gardenhorizonstocknotifier.com",
     siteName: "Garden Horizons Stock Notifier",
+    images: [
+      {
+        url: "/api/og?title=Garden%20Horizons%20Stock%20Notifier&desc=Live%20Stock%20Tracking%20Data",
+        width: 1200,
+        height: 630,
+        alt: "Garden Horizons Stock Notifier",
+      },
+    ],
     type: "website",
     locale: "en_US",
   },
@@ -19,6 +27,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Garden Horizons Stock Notifier",
     description: "Live Garden Horizons stock tracker. Never miss rare items again!",
+    images: ["/api/og?title=Garden%20Horizons%20Stock%20Notifier&desc=Live%20Stock%20Tracking%20Data"],
   },
   alternates: { canonical: "https://gardenhorizonstocknotifier.com" },
   robots: { index: true, follow: true },

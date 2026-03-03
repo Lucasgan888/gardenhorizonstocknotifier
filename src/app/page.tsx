@@ -1,6 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
+import useSWR from 'swr';
+import { motion, AnimatePresence } from 'framer-motion';
+import { BellRing, CheckCircle2 } from 'lucide-react';
 import {
     fetchGardenStock,
     CATEGORY_CONFIG,
@@ -77,9 +80,14 @@ function StockCard({
                         "bg-input-bg border-border-subtle";
 
     return (
-        <div
-            className={`relative flex items-center gap-3 p-3 rounded-xl border bg-surface shadow-xs transition-all duration-300 group 
-      ${isWatchedInStock ? 'border-accent shadow-focus bg-accent-soft/20 scale-[1.02]' : 'border-border-subtle hover:bg-surface-alt hover:border-border-strong hover:shadow-sm hover:scale-[1.01]'}`}
+        <motion.div
+            layout
+            initial={{ opacity: 0, scale: 0.9, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: -10 }}
+            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+            className={`relative flex items-center gap-3 p-3 rounded-xl border bg-surface shadow-xs transition-colors duration-300 group 
+      ${isWatchedInStock ? 'border-accent shadow-focus bg-accent-soft/20 scale-[1.02]' : 'border-border-subtle hover:bg-surface-alt hover:border-border-strong hover:shadow-sm'}`}
         >
             <div className={`relative flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-xl text-3xl border shadow-inner transition-transform group-hover:scale-110 overflow-hidden ${rarityBg}`}>
                 <img
@@ -103,19 +111,21 @@ function StockCard({
             </div>
 
             <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                <button
+                <motion.button
+                    whileHover={{ scale: 1.15 }}
+                    whileTap={{ scale: 0.9 }}
                     onClick={() => onToggleWatch(item.name)}
-                    className={`px-1.5 py-1 rounded-md transition hover:scale-110 ${watched ? "text-accent" : "text-text-muted hover:text-text-primary"}`}
+                    className={`px-1.5 py-1 rounded-md transition ${watched ? "text-accent" : "text-text-muted hover:text-text-primary"}`}
                     title={watched ? "Remove from watchlist" : "Add to watchlist"}
                     aria-label={watched ? "Remove from watchlist" : "Add to watchlist"}
                 >
                     {watched ? "★" : "☆"}
-                </button>
+                </motion.button>
                 <div className="text-xs font-mono font-medium text-text-secondary">
                     ×{item.quantity}
                 </div>
             </div>
-        </div>
+        </motion.div>
     );
 }
 
@@ -134,11 +144,23 @@ function RarityLegend() {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
+// SWR fetcher
+const fetcher = () => fetchGardenStock();
+
 export default function GardenHorizonsStockNotifier() {
-    const [stock, setStock] = useState<GardenStock | null>(null);
-    const [error, setError] = useState<string | null>(null);
-    const [loading, setLoading] = useState(true);
+    // Replace manual useEffect polling with useSWR
+    const { data: stock, error: swrError, isLoading, isValidating, mutate } = useSWR<GardenStock>(
+        'garden-stock',
+        fetcher,
+        {
+            refreshInterval: 30000,
+            revalidateOnFocus: true,
+            errorRetryCount: 3
+        }
+    );
+
     const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+    const [toastMessage, setToastMessage] = useState<{ title: string, msg: string, id: number } | null>(null);
 
     // Filters
     const [search, setSearch] = useState("");
@@ -148,6 +170,7 @@ export default function GardenHorizonsStockNotifier() {
     const [showWatchedOnly, setShowWatchedOnly] = useState(false);
 
     const [watchlist, setWatchlist] = useState<Set<string>>(new Set());
+    const [prevWatchedStock, setPrevWatchedStock] = useState<Record<string, number>>({});
 
     useEffect(() => {
         try {
@@ -165,24 +188,47 @@ export default function GardenHorizonsStockNotifier() {
         });
     }, []);
 
-    const loadStock = useCallback(async () => {
-        try {
-            const data = await fetchGardenStock();
-            setStock(data);
-            setLastUpdated(new Date());
-            setError(null);
-        } catch (e) {
-            setError("Unable to load stock data. Please try again shortly.");
-        } finally {
-            setLoading(false);
-        }
-    }, []);
-
+    // Update timestamp on data arrival & check for new watched restocks
     useEffect(() => {
-        loadStock();
-        const interval = setInterval(loadStock, 30000);
-        return () => clearInterval(interval);
-    }, [loadStock]);
+        if (stock) {
+            setLastUpdated(new Date());
+
+            // Check for restocked watched items to trigger a toast
+            const currentStockState: Record<string, number> = {};
+            const allItemsFlat = [
+                ...stock.seed.items, ...stock.egg.items, ...stock.gear.items,
+                ...stock.honey.items, ...stock.cosmetics.items, ...stock.travelingMerchant.items
+            ];
+
+            let newlyRestocked = 0;
+            let sampleItemName = "";
+
+            allItemsFlat.forEach(item => {
+                if (watchlist.has(item.name)) {
+                    currentStockState[item.name] = item.quantity;
+                    // If we previously had 0 or it's a new load, and now we have > 0 context
+                    if (item.quantity > 0 && prevWatchedStock[item.name] === 0) {
+                        newlyRestocked++;
+                        sampleItemName = item.name;
+                    }
+                }
+            });
+
+            if (newlyRestocked > 0 && Object.keys(prevWatchedStock).length > 0) {
+                setToastMessage({
+                    id: Date.now(),
+                    title: 'Restock Alert!',
+                    msg: newlyRestocked === 1
+                        ? `${sampleItemName} is now in stock!`
+                        : `${newlyRestocked} watched items just restocked!`,
+                });
+                // Auto clear toast
+                setTimeout(() => setToastMessage(null), 5000);
+            }
+
+            setPrevWatchedStock(currentStockState);
+        }
+    }, [stock, watchlist]); // eslint-disable-next-line react-hooks/exhaustive-deps
 
     // Derived State
     const allItems = useMemo(() => {
@@ -258,7 +304,10 @@ export default function GardenHorizonsStockNotifier() {
 
                     <div className="hidden lg:flex items-center gap-8 bg-surface border border-border-subtle rounded-2xl p-5 shadow-sm">
                         <div className="text-left">
-                            <div className="text-text-secondary text-[10px] uppercase tracking-wider mb-1 font-semibold">API Status</div>
+                            <div className="text-text-secondary text-[10px] uppercase tracking-wider mb-1 font-semibold flex items-center justify-between">
+                                <span>API Status</span>
+                                {isValidating && <span className="w-2 h-2 ml-2 rounded-full bg-blue-400 animate-ping" title="Syncing..."></span>}
+                            </div>
                             <div className="font-semibold text-accent flex items-center gap-1.5"><span className="text-lg leading-none">✓</span> Operational</div>
                         </div>
                         <div className="w-px h-10 bg-border-subtle"></div>
@@ -270,6 +319,26 @@ export default function GardenHorizonsStockNotifier() {
                         </div>
                     </div>
                 </header>
+
+                {/* SWR Toast Notification Overlay */}
+                <AnimatePresence>
+                    {toastMessage && (
+                        <motion.div
+                            initial={{ opacity: 0, y: -50, scale: 0.9 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: -20, scale: 0.9 }}
+                            className="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-surface border-2 border-accent shadow-[0_4px_30px_rgba(74,222,128,0.2)] rounded-2xl p-4 flex items-center gap-4 min-w-[300px]"
+                        >
+                            <div className="bg-accent/20 p-2 rounded-full text-accent">
+                                <BellRing size={24} className="animate-[wiggle_1s_ease-in-out_infinite]" />
+                            </div>
+                            <div>
+                                <h4 className="font-bold text-text-primary text-sm">{toastMessage.title}</h4>
+                                <p className="text-text-muted text-xs font-medium">{toastMessage.msg}</p>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
 
                 <div className="flex flex-col xl:flex-row gap-8 items-start">
 
@@ -325,28 +394,37 @@ export default function GardenHorizonsStockNotifier() {
                                 </button>
 
                                 <button
-                                    onClick={loadStock}
+                                    onClick={() => mutate()}
+                                    disabled={isValidating}
                                     title="Manual Refresh"
-                                    className="p-2.5 rounded-xl text-lg bg-surface-alt border border-border-strong hover:bg-surface hover:text-accent transition shrink-0 ml-1"
+                                    className="p-2.5 rounded-xl text-lg bg-surface-alt border border-border-strong hover:bg-surface hover:text-accent transition shrink-0 ml-1 disabled:opacity-50"
                                 >
-                                    <span className="block hover:rotate-180 transition-transform duration-500">↻</span>
+                                    <span className={`block transition-transform duration-500 ${isValidating ? 'animate-spin' : 'hover:rotate-180'}`}>↻</span>
                                 </button>
                             </div>
                         </div>
 
                         {/* Shop Tabs */}
-                        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide border-b border-border-subtle mt-2 pt-2">
+                        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide border-b border-border-subtle mt-2 pt-2 relative">
                             {TABS.map(tab => {
                                 const isActive = categoryFilter === tab;
                                 return (
                                     <button
                                         key={tab}
                                         onClick={() => setCategoryFilter(tab)}
-                                        className={`whitespace-nowrap flex items-center gap-2 px-5 py-3 rounded-t-xl text-sm font-bold transition-all ${isActive
-                                            ? 'bg-surface-alt shadow-[inset_0_-2px_0_0_#4ADE80] text-text-primary'
+                                        className={`relative whitespace-nowrap flex items-center gap-2 px-5 py-3 rounded-t-xl text-sm font-bold transition-all ${isActive
+                                            ? 'text-text-primary'
                                             : 'text-text-secondary hover:bg-surface-alt hover:text-text-primary'}`}
                                     >
-                                        <span className="text-lg opacity-80">{tab === "All" ? "🌍" : CATEGORY_CONFIG[tab].emoji}</span> {tab}
+                                        {isActive && (
+                                            <motion.div
+                                                layoutId="activeTabBadge"
+                                                className="absolute inset-0 bg-surface-alt shadow-[inset_0_-2px_0_0_#4ADE80] rounded-t-xl z-0"
+                                                transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                                            />
+                                        )}
+                                        <span className="relative z-10 text-lg opacity-80">{tab === "All" ? "🌍" : CATEGORY_CONFIG[tab].emoji}</span>
+                                        <span className="relative z-10">{tab}</span>
                                     </button>
                                 );
                             })}
@@ -358,19 +436,19 @@ export default function GardenHorizonsStockNotifier() {
                         </div>
 
                         {/* States */}
-                        {loading && (
+                        {isLoading && !stock && (
                             <div className="text-center py-24 text-text-muted bg-surface rounded-2xl border border-border-subtle shadow-xs">
                                 <div className="text-5xl mb-6 animate-bounce">🌱</div>
                                 <p className="text-sm font-medium tracking-wide">Syncing live server data…</p>
                             </div>
                         )}
 
-                        {error && !loading && (
+                        {swrError && !stock && (
                             <div className="text-center py-20 rounded-2xl border border-danger/40 bg-danger/10 shadow-xs">
                                 <p className="text-5xl mb-4">⚠️</p>
-                                <p className="text-danger text-sm font-medium mb-6">{error}</p>
+                                <p className="text-danger text-sm font-medium mb-6">Unable to load stock data. Please try again shortly.</p>
                                 <button
-                                    onClick={loadStock}
+                                    onClick={() => mutate()}
                                     className="px-5 py-2.5 rounded-xl text-sm font-bold bg-danger/20 text-danger border border-danger/40 hover:bg-danger/30 transition auto shadow-xs"
                                 >
                                     Retry Connection
@@ -379,7 +457,7 @@ export default function GardenHorizonsStockNotifier() {
                         )}
 
                         {/* Render Category Grids */}
-                        {stock && !loading && (
+                        {stock && !isLoading && (
                             <div className="space-y-12 mb-8">
                                 {activeCategories.map(cat => {
                                     const cData = getCategoryData(cat);
@@ -404,16 +482,21 @@ export default function GardenHorizonsStockNotifier() {
                                             </div>
 
                                             {items.length > 0 ? (
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3">
-                                                    {items.map((item) => (
-                                                        <StockCard
-                                                            key={item.name}
-                                                            item={item}
-                                                            watched={watchlist.has(item.name)}
-                                                            onToggleWatch={toggleWatch}
-                                                        />
-                                                    ))}
-                                                </div>
+                                                <motion.div
+                                                    layout
+                                                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3"
+                                                >
+                                                    <AnimatePresence mode="popLayout">
+                                                        {items.map((item) => (
+                                                            <StockCard
+                                                                key={item.name}
+                                                                item={item}
+                                                                watched={watchlist.has(item.name)}
+                                                                onToggleWatch={toggleWatch}
+                                                            />
+                                                        ))}
+                                                    </AnimatePresence>
+                                                </motion.div>
                                             ) : (
                                                 <div className="py-12 text-center border-2 border-dashed border-border-subtle rounded-2xl bg-surface/30 text-text-muted text-sm font-medium">
                                                     {cat === "Traveling Merchant" && stock.travelingMerchant.status === "leaved"
@@ -428,9 +511,10 @@ export default function GardenHorizonsStockNotifier() {
                         )}
 
                         {/* Small subtle data source credit below grid */}
-                        <div className="pt-8 mb-4 text-center text-xs text-text-muted border-t border-border-subtle">
-                            <span className="opacity-60">Auto-refreshes every 30s · Powered by </span>
-                            <a href="https://gagstock.gleeze.com" target="_blank" rel="noopener noreferrer" className="opacity-100 text-accent font-medium hover:underline underline-offset-2">GAG Stock API</a>
+                        <div className="pt-8 mb-4 text-center text-xs text-text-muted border-t border-border-subtle flex flex-col sm:flex-row items-center justify-center gap-1.5 opacity-60">
+                            <span>Auto-refreshes every 30s</span>
+                            <span className="hidden sm:inline">·</span>
+                            <span>Powered by <a href="https://gagstock.gleeze.com" target="_blank" rel="noopener noreferrer" className="opacity-100 text-accent font-medium hover:underline underline-offset-2">GAG Stock API</a></span>
                         </div>
 
                     </div>
