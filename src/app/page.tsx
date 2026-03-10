@@ -90,13 +90,13 @@ function StockCard({
       ${isWatchedInStock ? 'border-accent ring-1 ring-accent/20 bg-accent-soft/10' : 'border-border-strong hover:border-accent/40 hover:bg-surface-alt'}`}
         >
             <div className={`relative flex-shrink-0 w-14 h-14 flex items-center justify-center rounded-xl border shadow-inner transition-transform group-hover:rotate-3 ${rarityStyle}`}>
-                <span className="text-3xl z-10">{item.emoji}</span>
                 <img
                     src={`/items/${item.name.toLowerCase().replace(/ /g, '-')}.webp`}
                     alt={item.name}
-                    className="w-10 h-10 object-contain absolute z-20 transition-transform group-hover:scale-110"
+                    className="w-10 h-10 object-contain absolute z-10 transition-transform group-hover:scale-110"
                     onError={(e) => { e.currentTarget.style.display = 'none'; }}
                 />
+                <span className="text-3xl z-0 opacity-40 group-hover:opacity-100 transition-opacity">{item.emoji}</span>
             </div>
 
             <div className="flex-1 min-w-0">
