@@ -1,0 +1,17 @@
+{
+  "name": "garden-horizons-discord-bot",
+  "version": "1.0.0",
+  "description": "Discord bot for monitoring Garden Horizons stock updates",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node index.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.6.2",
+    "cors": "^2.8.5",
+    "discord.js": "^14.14.1",
+    "dotenv": "^16.4.1",
+    "express": "^4.18.2"
+  }
+}

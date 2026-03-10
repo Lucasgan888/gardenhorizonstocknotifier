@@ -8,102 +8,75 @@ export const metadata: Metadata = {
 
 export default function FAQPage() {
     return (
-        <div className="max-w-4xl mx-auto px-4 py-12 md:py-20">
-            <nav className="text-sm text-gray-500 mb-8 flex items-center gap-2">
-                <Link href="/" className="hover:text-white transition-colors">Home</Link>
-                <span>&gt;</span>
-                <span className="text-white">FAQ</span>
+        <div className="max-w-4xl mx-auto px-4 py-16 md:py-24">
+            <nav className="text-[10px] font-bold uppercase tracking-widest text-text-muted mb-12 flex items-center gap-2">
+                <Link href="/" className="hover:text-accent transition-colors">Home</Link>
+                <span className="opacity-30">/</span>
+                <span className="text-text-secondary">Archive</span>
             </nav>
 
-            <article className="space-y-12">
-                <header className="space-y-6">
-                    <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-400 to-indigo-500 bg-clip-text text-transparent">
-                        Garden Horizons Stock Notifier FAQ
+            <article className="space-y-16">
+                <header className="space-y-6 border-b border-border-strong pb-12">
+                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-accent">Protocol Index</p>
+                    <h1 className="text-4xl md:text-6xl font-black text-text-primary leading-tight font-serif italic">
+                        Inquiry Archive
                     </h1>
-                    <p className="text-xl text-gray-400 leading-relaxed max-w-3xl">
-                        This FAQ answers the most common questions about how the stock tracker works, what data it uses, and how you can get the most value out of it as a Garden Horizons player.
+                    <p className="text-lg text-text-secondary leading-relaxed max-w-2xl font-medium">
+                        Comprehensive documentation on the Garden Horizons Stock Notifier mechanics, data telemetry, and operational protocols.
                     </p>
                 </header>
 
-                <div className="grid gap-6">
-                    <section className="p-6 bg-[#11161F] border border-white/5 rounded-2xl">
-                        <h2 className="text-xl font-bold text-white mb-2">Is Garden Horizons Stock Notifier free?</h2>
-                        <p className="text-gray-400 leading-relaxed">
-                            Yes. The tracker is completely free to use. There is no registration required, no downloads, and no hidden fees. You can simply open the website, view the current stock, and start playing.
+                <div className="grid gap-8">
+                    <section className="p-8 bg-surface/40 border border-border-strong rounded-3xl shadow-sm group hover:border-accent/30 transition-colors">
+                        <h2 className="text-xl font-bold text-text-primary mb-3 font-serif italic group-hover:text-accent transition-colors">Is Garden Horizons Stock Notifier free?</h2>
+                        <p className="text-text-secondary text-sm leading-relaxed font-medium">
+                            The Stock Notifier is a community-funded instrument. Access is unrestricted: no fees, no registration, and no localized data harvesting required. Open the terminal and begin tracking instantly.
                         </p>
                     </section>
 
-                    <section className="p-6 bg-[#11161F] border border-white/5 rounded-2xl">
-                        <h2 className="text-xl font-bold text-white mb-2">How often does the stock update?</h2>
-                        <p className="text-gray-400 leading-relaxed">
-                            The website refreshes its data automatically every 30 seconds to keep up with in-game shop changes. Garden Horizons shop stock usually rotates on a short cycle, so frequent updates are important to show you what is currently available.
+                    <section className="p-8 bg-surface/40 border border-border-strong rounded-3xl shadow-sm group hover:border-accent/30 transition-colors">
+                        <h2 className="text-xl font-bold text-text-primary mb-3 font-serif italic group-hover:text-accent transition-colors">How often does the stock update?</h2>
+                        <p className="text-text-secondary text-sm leading-relaxed font-medium">
+                            Our sensors refresh precisely every 30 seconds to maintain parity with the Grow a Garden shop cycles. While game rotations typically occur in 5-minute windows, our telemetry ensures you see the flip the moment it happens.
                         </p>
                     </section>
 
-                    <section className="p-6 bg-[#11161F] border border-white/5 rounded-2xl">
-                        <h2 className="text-xl font-bold text-white mb-2">Do I need to log in with my Roblox account?</h2>
-                        <p className="text-gray-400 leading-relaxed">
-                            No. The tracker does not ask for your Roblox login or any personal account information. It simply reads publicly available game data and displays the current shop inventory in a convenient format.
+                    <section className="p-8 bg-surface/40 border border-border-strong rounded-3xl shadow-sm group hover:border-accent/30 transition-colors">
+                        <h2 className="text-xl font-bold text-text-primary mb-3 font-serif italic group-hover:text-accent transition-colors">Do I need to log in with my Roblox account?</h2>
+                        <p className="text-text-secondary text-sm leading-relaxed font-medium">
+                            Negating the need for authentication is a core design principle. The notifier operates on public server telemetry and does not interact with your Roblox account security or credentials.
                         </p>
                     </section>
 
-                    <section className="p-6 bg-[#11161F] border border-white/5 rounded-2xl">
-                        <h2 className="text-xl font-bold text-white mb-2">Can I get push notifications or alerts?</h2>
-                        <p className="text-gray-400 leading-relaxed">
-                            Push notifications are not available yet, but they are on the roadmap. For now, you can keep the tracker open in a browser tab, star items you care about, and use the watchlist view to see when your favorites are in stock.
+                    <section className="p-8 bg-surface/40 border border-border-strong rounded-3xl shadow-sm group hover:border-accent/30 transition-colors">
+                        <h2 className="text-xl font-bold text-text-primary mb-3 font-serif italic group-hover:text-accent transition-colors">Where does the stock data come from?</h2>
+                        <p className="text-text-secondary text-sm leading-relaxed font-medium">
+                            We maintain direct integration with the GAG Stock API. This provides a 100% verified feed of in-game inventory rotations. During game updates or server maintenance, minor latency may occur as systems re-synchronize.
                         </p>
                     </section>
 
-                    <section className="p-6 bg-[#11161F] border border-white/5 rounded-2xl">
-                        <h2 className="text-xl font-bold text-white mb-2">How does the watchlist work?</h2>
-                        <p className="text-gray-400 leading-relaxed">
-                            On the live stock page, you can click the star icon on any item to add it to your watchlist. When that item appears in stock again, it will be highlighted at the top in the watchlist view. This makes it much easier to track specific seeds, tools, or cosmetics.
+                    <section className="p-8 bg-surface/40 border border-border-strong rounded-3xl shadow-sm group hover:border-accent/30 transition-colors">
+                        <h2 className="text-xl font-bold text-text-primary mb-3 font-serif italic group-hover:text-accent transition-colors">Is this affiliated with Roblox or the developers?</h2>
+                        <p className="text-text-secondary text-sm leading-relaxed font-medium italic">
+                            Independent fan-maintained instrument. No official affiliation with Roblox Corporation or the developers of Garden Horizons. All intellectual property remains with the original creators.
                         </p>
                     </section>
 
-                    <section className="p-6 bg-[#11161F] border border-white/5 rounded-2xl">
-                        <h2 className="text-xl font-bold text-white mb-2">Where does the stock data come from?</h2>
-                        <p className="text-gray-400 leading-relaxed">
-                            The tracker uses live data from a dedicated Garden Horizons stock API. This data is updated frequently to match in-game rotations, but there may occasionally be small delays or mismatches if the game itself is experiencing issues.
-                        </p>
-                    </section>
-
-                    <section className="p-6 bg-[#11161F] border border-white/5 rounded-2xl">
-                        <h2 className="text-xl font-bold text-white mb-2">Is this affiliated with Roblox or the Garden Horizons developers?</h2>
-                        <p className="text-gray-400 leading-relaxed">
-                            No. Garden Horizons Stock Notifier is an unofficial fan-made tool. It is not affiliated with Roblox Corporation or the developers of Garden Horizons, and all game assets and names belong to their respective owners.
-                        </p>
-                    </section>
-
-                    <section className="p-6 bg-[#11161F] border border-white/5 rounded-2xl">
-                        <h2 className="text-xl font-bold text-white mb-2">How accurate is the stock information?</h2>
-                        <p className="text-gray-400 leading-relaxed">
-                            Stock information is generally very accurate because it is pulled from live game data and refreshed automatically. However, rare edge cases can occur if the game updates or if there are network issues. If you ever notice a discrepancy, you can report it through the contact page.
-                        </p>
-                    </section>
-
-                    <section className="p-6 bg-[#11161F] border border-white/5 rounded-2xl">
-                        <h2 className="text-xl font-bold text-white mb-2">Does this work on mobile devices?</h2>
-                        <p className="text-gray-400 leading-relaxed">
-                            Yes. The website is fully responsive and works on phones, tablets, and desktop computers. Many players keep the tracker open on a mobile device while playing Roblox on another screen.
-                        </p>
-                    </section>
-
-                    <section className="p-6 bg-[#11161F] border border-[#FACC15]/20 rounded-2xl">
-                        <h2 className="text-xl font-bold text-[#FACC15] mb-2">What is the rarest item in Garden Horizons?</h2>
-                        <p className="text-gray-300 leading-relaxed">
-                            Legendary-tier items are considered the rarest and most sought-after in Garden Horizons. These can include high-impact tools and unique special items that only appear occasionally in shop rotations.
+                    <section className="p-8 bg-accent/5 border border-accent/20 rounded-3xl shadow-inner">
+                        <h2 className="text-xl font-bold text-accent mb-3 font-serif italic">What is the rarest item to track?</h2>
+                        <p className="text-text-secondary text-sm leading-relaxed font-medium">
+                            Legendary assets like the <span className="text-rarity-legendary font-bold">Lucky Clover</span> and <span className="text-rarity-legendary font-bold">Weather Machine</span> are the highest priority. These appear infrequently and represent the primary use case for high-frequency live tracking.
                         </p>
                     </section>
                 </div>
 
-                <div className="pt-8 text-center pb-8 border-b border-white/5">
+                <div className="pt-12 text-center pb-12">
                     <Link
                         href="/"
-                        className="inline-flex items-center gap-2 bg-green-500 hover:bg-green-400 text-black font-bold py-4 px-8 rounded-xl shadow-lg shadow-green-500/20 transition-all transform hover:scale-105"
+                        className="inline-flex items-center gap-3 bg-accent hover:bg-accent-hover text-background font-black text-sm uppercase tracking-widest py-5 px-10 rounded-2xl shadow-lg transition-all transform hover:-translate-y-1"
                     >
-                        <span>Open the live Garden Horizons stock tracker</span>
-                        <span className="text-xl">🚀</span>
+                        <span>Access Live Tracking Terminal</span>
+                        <span className="text-xl">→</span>
                     </Link>
                 </div>
             </article>

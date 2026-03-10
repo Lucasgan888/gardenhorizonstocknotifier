@@ -1,42 +1,53 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-background: #070B10;
-  --color-surface: #11161F;
-  --color-surface-alt: #171E29;
+  /* Garden Horizon: Field Notebook Theme */
+  --color-background: #0f140d; /* Deep Soil Green */
+  --color-surface: #1a2318; /* Dark Moss */
+  --color-surface-alt: #242e21; /* Earthy Overlay */
 
-  --color-border-subtle: rgba(255, 255, 255, 0.06);
-  --color-border-strong: rgba(255, 255, 255, 0.12);
+  --color-border-subtle: rgba(242, 232, 207, 0.08); /* Wheat Tint */
+  --color-border-strong: rgba(242, 232, 207, 0.15);
 
-  --color-text-primary: #F5F7FA;
-  --color-text-secondary: #A3B1C2;
-  --color-text-muted: #6B7685;
+  --color-text-primary: #f2e8cf; /* Classic Wheat */
+  --color-text-secondary: #a3ad91; /* Sage / Muted Moss */
+  --color-text-muted: #6b765e; /* Earthy Shadow */
 
-  --color-accent: #4ADE80;
-  --color-accent-soft: rgba(74, 222, 128, 0.16);
-  --color-accent-hover: #22C55E;
+  --color-accent: #8fb339; /* Vibrant Moss / Growth */
+  --color-accent-soft: rgba(143, 179, 57, 0.15);
+  --color-accent-hover: #a7c957;
 
-  --color-input-bg: #0D1118;
-  --color-input-border: rgba(148, 163, 184, 0.5);
-  --color-input-focus: #4ADE80;
+  --color-input-bg: #0a0e08;
+  --color-input-border: rgba(242, 232, 207, 0.3);
+  --color-input-focus: #8fb339;
 
-  --color-rarity-common: #9CA3AF;
-  --color-rarity-uncommon: #22C55E;
-  --color-rarity-rare: #3B82F6;
-  --color-rarity-epic: #A855F7;
-  --color-rarity-legendary: #FACC15;
+  /* Rarity Colors - Muted for "Field Guide" look */
+  --color-rarity-common: #8c8c8c;
+  --color-rarity-uncommon: #588157;
+  --color-rarity-rare: #344e41;
+  --color-rarity-epic: #4a306d;
+  --color-rarity-legendary: #bc6c25;
 
-  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-sm: 0 4px 10px rgba(0, 0, 0, 0.45);
-  --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.55);
-  --shadow-lg: 0 18px 45px rgba(0, 0, 0, 0.65);
-  --shadow-focus: 0 0 0 1px rgba(74, 222, 128, 0.8);
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.6);
+  --shadow-md: 0 12px 32px rgba(0, 0, 0, 0.7);
+  --shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.8);
+  --shadow-focus: 0 0 0 2px rgba(143, 179, 57, 0.6);
 
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-geist-sans), Inter, system-ui;
+  --font-serif: "Crimson Text", "Georgia", serif; /* For that "Encyclopedia" feel */
 }
 
 body {
   background-color: var(--color-background);
   color: var(--color-text-primary);
+  background-image: 
+    radial-gradient(circle at 50% 50%, rgba(143, 179, 57, 0.03) 0%, transparent 100%),
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.02'/%3E%3C/svg%3E");
+  background-attachment: fixed;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-serif);
+  letter-spacing: -0.01em;
 }

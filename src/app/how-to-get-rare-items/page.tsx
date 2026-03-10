@@ -4,6 +4,9 @@ import Link from 'next/link';
 export const metadata: Metadata = {
     title: 'How to Get Rare Items in Garden Horizons - Stock Rotation Tips',
     description: 'Learn the best strategies to find and obtain rare and legendary items in Garden Horizons. Discover stock rotation tips and maximize your gameplay.',
+    alternates: {
+        canonical: 'https://gardenhorizonstocknotifier.com/guides/how-to-get-rare-items-fast',
+    },
 };
 
 export default function HowToGetRareItemsPage() {

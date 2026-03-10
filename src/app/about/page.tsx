@@ -5,31 +5,48 @@ export const metadata: Metadata = {
   description: "Learn about Garden Horizons Stock Notifier, a free real-time Roblox item stock tracker.",
 };
 
+import { LegacyPageWrapper } from "@/components/legacy-wrapper";
+
 export default function AboutPage() {
   return (
-    <div className="max-w-3xl mx-auto px-4 py-12 prose prose-invert prose-green">
-      <h1 className="text-3xl font-bold text-green-500">About Garden Horizons Stock Notifier</h1>
-      <p>
-        Welcome to Garden Horizons Stock Notifier, a free real-time stock tracking tool for the popular
-        Roblox game Garden Horizons. We help players track item availability, catch rare seeds and tools,
-        and never miss a stock rotation.
-      </p>
-      <h2>Our Mission</h2>
-      <p>
-        Garden Horizons rotates its shop inventory every 5 minutes, making it nearly impossible to catch
-        rare Legendary items without help. We built this tracker so every player has a fair chance at
-        getting the items they want.
-      </p>
-      <h2>How It Works</h2>
-      <p>
-        Our system monitors Garden Horizons stock rotations and displays the current inventory in real-time.
-        Filter by category, rarity, or search for specific items. Check the countdown timer to know exactly
-        when the next rotation happens.
-      </p>
-      <h2>Disclaimer</h2>
-      <p>
-        This is a fan-made tool and is not affiliated with Roblox Corporation or the Garden Horizons developers.
-      </p>
-    </div>
+    <LegacyPageWrapper 
+      title="Intelligence Operations" 
+      subtitle="Learn about the Garden Horizons Stock Notifier mission, our real-time tracking architecture, and the team behind the field engine."
+      category="About the Project"
+    >
+      <section>
+        <h2>Our Mission</h2>
+        <p>
+          Welcome to the Garden Horizons Stock Notifier, the definitive field instrument for the popular
+          Roblox botany experience. We specialize in synchronizing live shop telemetry to ensure every player 
+          has a strategic advantage in the botanical exchange.
+        </p>
+      </section>
+
+      <section>
+        <h2>The Core Engine</h2>
+        <p>
+          Garden Horizons rotates its shop inventory every few minutes, making manual tracking of 
+          <strong>Legendary</strong> assets nearly impossible. We engineered this terminal to bridge the gap 
+          between the game servers and the player community, providing a fair chance at securing rare 
+          growth stimulants and high-efficiency tools.
+        </p>
+      </section>
+
+      <section>
+        <h2>Operational Protocol</h2>
+        <p>
+          Our sensors monitor rotation headers and display current inventory in a tactical dashboard. 
+          Through advanced filtering and watchlist protocols, we allow you to focus on your garden 
+          while we handle the surveillance of the merchant network.
+        </p>
+      </section>
+
+      <section>
+        <p className="text-text-muted italic text-sm border-l-2 border-border-strong pl-4">
+          Un-official fan-maintained instrument. No affiliation with Roblox Corporation or the original game developers.
+        </p>
+      </section>
+    </LegacyPageWrapper>
   );
 }

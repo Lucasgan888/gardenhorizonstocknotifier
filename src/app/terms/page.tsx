@@ -5,23 +5,59 @@ export const metadata: Metadata = {
   description: "Terms of service for Garden Horizons Stock Notifier.",
 };
 
+import { LegacyPageWrapper } from "@/components/legacy-wrapper";
+
 export default function TermsPage() {
   return (
-    <div className="max-w-3xl mx-auto px-4 py-12 prose prose-invert prose-green">
-      <h1 className="text-3xl font-bold text-green-500">Terms of Service</h1>
-      <p>Last updated: February 2026</p>
-      <h2>Acceptance of Terms</h2>
-      <p>By accessing and using Garden Horizons Stock Notifier, you agree to these terms of service.</p>
-      <h2>Description of Service</h2>
-      <p>Garden Horizons Stock Notifier is a free online tool that tracks in-game item availability. The service is provided &quot;as is&quot; without warranties of any kind.</p>
-      <h2>User Conduct</h2>
-      <p>You agree to use the service only for lawful purposes and in accordance with these terms.</p>
-      <h2>Intellectual Property</h2>
-      <p>Not affiliated with Roblox Corporation or Garden Horizons developers. The website code and design are original works.</p>
-      <h2>Limitation of Liability</h2>
-      <p>We shall not be liable for any damages arising from the use of this service.</p>
-      <h2>Changes to Terms</h2>
-      <p>We reserve the right to modify these terms at any time.</p>
-    </div>
+    <LegacyPageWrapper 
+      title="Terms of Service" 
+      subtitle="Operational agreement and legal framework for the utilization of the Garden Horizons Notifier terminal."
+      category="Governance"
+      breadcrumbTitle="Terms"
+    >
+      <section>
+        <h2>Acceptance of Protocol</h2>
+        <p>
+          By accessing or utilizing the Garden Horizons Stock Notifier terminal, you acknowledge and agree 
+           to these terms. If you do not agree to the operational parameters defined herein, you must 
+           disconnect from the service immediately.
+        </p>
+      </section>
+
+      <section>
+        <h2>Service Definition</h2>
+        <p>
+          The Garden Horizons Stock Notifier is provided as a free, &quot;as-is&quot; instrument for monitoring 
+          botanical shop rotations. We provide no warranty regarding data accuracy, system uptime, or 
+          sensor latency.
+        </p>
+      </section>
+
+      <section>
+        <h2>Intellectual Property</h2>
+        <p>
+          Not affiliated with Roblox Corporation or Garden Horizons developers. The terminal code, design, 
+          and field notebook aesthetic are original works. All game-related assets and trademarks are the 
+          property of their respective owners.
+        </p>
+      </section>
+
+      <section>
+        <h2>Limitation of Liability</h2>
+        <p>
+          We shall not be held liable for missed shop rotations, lost coins, or any in-game strategic 
+          failures resulting from the use or misuse of this telemetry data. Use the terminal as a 
+          supplementary instrument at your own risk.
+        </p>
+      </section>
+
+      <section>
+        <h2>Protocol Modifications</h2>
+        <p>
+          We reserve the right to update these service terms and operational protocols at any time without 
+          prior notification.
+        </p>
+      </section>
+    </LegacyPageWrapper>
   );
 }

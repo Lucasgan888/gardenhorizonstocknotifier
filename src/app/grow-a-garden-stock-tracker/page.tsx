@@ -4,6 +4,9 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: 'Grow a Garden Live Stock Tracker - Seeds, Gear, Eggs & Merchant',
   description: 'Garden Horizons Stock Notifier is a fan-made live stock tracker for the Roblox game Grow a Garden. It shows real-time shop inventory.',
+  alternates: {
+    canonical: 'https://gardenhorizonstocknotifier.com/',
+  },
 };
 
 export default function GrowAGardenStockTrackerPage() {

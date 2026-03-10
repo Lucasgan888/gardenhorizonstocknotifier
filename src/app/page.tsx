@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import Link from "next/link";
 import useSWR from 'swr';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BellRing, CheckCircle2 } from 'lucide-react';
+import { BellRing } from 'lucide-react';
 import {
     fetchGardenStock,
     CATEGORY_CONFIG,
@@ -29,11 +30,11 @@ function getItemRarity(name: string, category: string): Rarity {
 }
 
 const RARITY_COLORS: Record<Rarity, string> = {
-    Common: "text-rarity-common bg-rarity-common/15",
-    Uncommon: "text-rarity-uncommon bg-rarity-uncommon/15",
-    Rare: "text-rarity-rare bg-rarity-rare/15",
-    Epic: "text-rarity-epic bg-rarity-epic/15",
-    Legendary: "text-rarity-legendary bg-rarity-legendary/15",
+    Common: "text-rarity-common bg-rarity-common/10 border-rarity-common/20",
+    Uncommon: "text-rarity-uncommon bg-rarity-uncommon/10 border-rarity-uncommon/20",
+    Rare: "text-rarity-rare bg-rarity-rare/10 border-rarity-rare/20",
+    Epic: "text-rarity-epic bg-rarity-epic/10 border-rarity-epic/20",
+    Legendary: "text-rarity-legendary bg-rarity-legendary/10 border-rarity-legendary/20",
 };
 
 const RARITY_DOTS: Record<Rarity, string> = {
@@ -72,63 +73,57 @@ function StockCard({
     const rarity = getItemRarity(item.name, item.category);
     const isWatchedInStock = watched && item.quantity > 0;
 
-    const rarityBg =
-        rarity === "Legendary" ? "bg-amber-500/10 border-amber-500/30 text-amber-300 drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]" :
-            rarity === "Epic" ? "bg-purple-500/10 border-purple-500/30 text-purple-300 drop-shadow-[0_0_6px_rgba(168,85,247,0.4)]" :
-                rarity === "Rare" ? "bg-blue-500/10 border-blue-500/30 text-blue-300 drop-shadow-[0_0_6px_rgba(59,130,246,0.4)]" :
-                    rarity === "Uncommon" ? "bg-green-500/10 border-green-500/30 text-green-300" :
-                        "bg-input-bg border-border-subtle";
+    const rarityStyle =
+        rarity === "Legendary" ? "border-rarity-legendary/40 bg-rarity-legendary/5 text-rarity-legendary" :
+            rarity === "Epic" ? "border-rarity-epic/40 bg-rarity-epic/5 text-rarity-epic" :
+                rarity === "Rare" ? "border-rarity-rare/40 bg-rarity-rare/5 text-rarity-rare" :
+                    rarity === "Uncommon" ? "border-rarity-uncommon/40 bg-rarity-uncommon/5 text-rarity-uncommon" :
+                        "border-border-subtle bg-surface-alt/50 text-text-muted";
 
     return (
         <motion.div
             layout
-            initial={{ opacity: 0, scale: 0.9, y: 10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: -10 }}
-            transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            className={`relative flex items-center gap-3 p-3 rounded-xl border bg-surface shadow-xs transition-colors duration-300 group 
-      ${isWatchedInStock ? 'border-accent shadow-focus bg-accent-soft/20 scale-[1.02]' : 'border-border-subtle hover:bg-surface-alt hover:border-border-strong hover:shadow-sm'}`}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className={`relative flex items-center gap-4 p-4 rounded-2xl border bg-surface transition-all duration-300 group shadow-sm
+      ${isWatchedInStock ? 'border-accent ring-1 ring-accent/20 bg-accent-soft/10' : 'border-border-strong hover:border-accent/40 hover:bg-surface-alt'}`}
         >
-            <div className={`relative flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-xl text-3xl border shadow-inner transition-transform group-hover:scale-110 overflow-hidden ${rarityBg}`}>
+            <div className={`relative flex-shrink-0 w-14 h-14 flex items-center justify-center rounded-xl border shadow-inner transition-transform group-hover:rotate-3 ${rarityStyle}`}>
                 <img
                     src={`/items/${item.name.toLowerCase().replace(/ /g, '-')}.webp`}
                     alt={item.name}
-                    className="w-10 h-10 object-contain absolute z-10 transition-opacity duration-300"
-                    onError={(e) => { e.currentTarget.style.opacity = '0'; }}
+                    className="w-10 h-10 object-contain absolute z-10 transition-transform group-hover:scale-110"
+                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
                 />
-                <span className="transform transition-transform z-0">{item.emoji}</span>
+                <span className="text-3xl z-0 opacity-40 group-hover:opacity-100 transition-opacity">{item.emoji}</span>
             </div>
 
-            <div className="flex-1 min-w-0 pr-2">
-                <h3 className="font-semibold text-sm text-text-primary truncate leading-tight mb-1" title={item.name}>
+            <div className="flex-1 min-w-0">
+                <h3 className="font-bold text-sm text-text-primary truncate mb-1 group-hover:text-accent transition-colors" title={item.name}>
                     {item.name}
                 </h3>
                 <div className="flex items-center gap-2">
-                    <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${RARITY_COLORS[rarity]}`}>
+                    <span className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest border ${RARITY_COLORS[rarity]}`}>
                         {rarity}
                     </span>
                 </div>
             </div>
 
-            <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                <motion.button
-                    whileHover={{ scale: 1.15 }}
-                    whileTap={{ scale: 0.9 }}
+            <div className="flex flex-col items-end gap-2 shrink-0">
+                <button
                     onClick={() => onToggleWatch(item.name)}
-                    className={`px-1.5 py-1 rounded-md transition ${watched ? "text-accent" : "text-text-muted hover:text-text-primary"}`}
-                    title={watched ? "Remove from watchlist" : "Add to watchlist"}
-                    aria-label={watched ? "Remove from watchlist" : "Add to watchlist"}
+                    className={`text-xl transition-all hover:scale-125 ${watched ? "text-accent" : "text-text-muted hover:text-text-secondary"}`}
                 >
                     {watched ? "★" : "☆"}
-                </motion.button>
-                <div className="text-xs font-mono font-medium text-text-secondary">
+                </button>
+                <div className="text-xs font-mono font-bold text-text-secondary bg-surface-alt px-2 py-0.5 rounded-md border border-border-strong">
                     ×{item.quantity}
                 </div>
             </div>
         </motion.div>
     );
 }
-
 function RarityLegend() {
     return (
         <div className="flex flex-wrap items-center gap-4 text-xs font-medium">
@@ -170,7 +165,7 @@ export default function GardenHorizonsStockNotifier() {
     const [showWatchedOnly, setShowWatchedOnly] = useState(false);
 
     const [watchlist, setWatchlist] = useState<Set<string>>(new Set());
-    const [prevWatchedStock, setPrevWatchedStock] = useState<Record<string, number>>({});
+    const prevWatchedStockRef = useRef<Record<string, number>>({});
 
     useEffect(() => {
         try {
@@ -182,7 +177,11 @@ export default function GardenHorizonsStockNotifier() {
     const toggleWatch = useCallback((name: string) => {
         setWatchlist((prev) => {
             const next = new Set(prev);
-            next.has(name) ? next.delete(name) : next.add(name);
+            if (next.has(name)) {
+                next.delete(name);
+            } else {
+                next.add(name);
+            }
             localStorage.setItem("gag-watchlist", JSON.stringify([...next]));
             return next;
         });
@@ -193,7 +192,7 @@ export default function GardenHorizonsStockNotifier() {
         if (stock) {
             setLastUpdated(new Date());
 
-            // Check for restocked watched items to trigger a toast
+            const prevWatchedStock = prevWatchedStockRef.current;
             const currentStockState: Record<string, number> = {};
             const allItemsFlat = [
                 ...stock.seed.items, ...stock.egg.items, ...stock.gear.items,
@@ -226,9 +225,9 @@ export default function GardenHorizonsStockNotifier() {
                 setTimeout(() => setToastMessage(null), 5000);
             }
 
-            setPrevWatchedStock(currentStockState);
+            prevWatchedStockRef.current = currentStockState;
         }
-    }, [stock, watchlist]); // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [stock, watchlist]);
 
     // Derived State
     const allItems = useMemo(() => {
@@ -249,7 +248,7 @@ export default function GardenHorizonsStockNotifier() {
 
     // Filter & Sort Logic
     const getFilteredItems = (items: StockItem[]) => {
-        let filtered = items.filter((item) => {
+        const filtered = items.filter((item) => {
             if (search && !item.name.toLowerCase().includes(search.toLowerCase())) return false;
             if (showWatchedOnly && !watchlist.has(item.name)) return false;
             if (rarityFilter !== "All" && getItemRarity(item.name, item.category) !== rarityFilter) return false;
@@ -287,8 +286,8 @@ export default function GardenHorizonsStockNotifier() {
         <div className="min-h-screen bg-background text-text-primary font-sans">
             <div className="max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
 
-                {/* ── Hero Dashboard Header ────────────────────────────────────────── */}
-                <header className="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-8 gap-6 border-b border-border-subtle pb-8">
+                {/* ── Section 1: Hero Dashboard & Live Tracker ────────────────────────── */}
+                <header className="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-12 gap-8 border-b border-border-strong pb-12">
                     <div className="flex-1">
                         <div className="inline-flex items-center gap-2 mb-3">
                             <span className="w-2.5 h-2.5 rounded-full bg-accent animate-pulse shadow-focus"></span>
@@ -511,196 +510,192 @@ export default function GardenHorizonsStockNotifier() {
                         )}
 
                         {/* Small subtle data source credit below grid */}
-                        <div className="pt-8 mb-4 text-center text-xs text-text-muted border-t border-border-subtle flex flex-col sm:flex-row items-center justify-center gap-1.5 opacity-60">
+                        <div className="pt-8 mb-4 text-center text-xs text-text-muted border-t border-border-strong flex flex-col sm:flex-row items-center justify-center gap-1.5 opacity-60">
                             <span>Auto-refreshes every 30s</span>
                             <span className="hidden sm:inline">·</span>
                             <span>Powered by <a href="https://gagstock.gleeze.com" target="_blank" rel="noopener noreferrer" className="opacity-100 text-accent font-medium hover:underline underline-offset-2">GAG Stock API</a></span>
                         </div>
-
                     </div>
 
-                    {/* ── Right Column: Watchlist Drawer ─────────────────────────────── */}
+                    {/* ── Section 5: Watchlist Sidebar (Field Ledger) ────────────────── */}
                     <aside className="w-full xl:w-80 shrink-0">
                         <div className="sticky top-6">
-
-                            <div className="rounded-2xl border border-border-strong bg-surface shadow-md overflow-hidden flex flex-col max-h-[calc(100vh-3rem)]">
+                            <div className="rounded-3xl border border-border-strong bg-surface/60 backdrop-blur-md shadow-lg overflow-hidden flex flex-col max-h-[calc(100vh-3rem)]">
                                 {/* Header */}
-                                <div className="p-5 border-b border-border-subtle flex items-center justify-between bg-surface-alt">
-                                    <h2 className="text-base font-extrabold text-text-primary flex items-center gap-2.5">
-                                        <span className="text-accent text-lg filter drop-shadow-[0_0_8px_rgba(74,222,128,0.5)]">⭐</span> My Watchlist
+                                <div className="p-6 border-b border-border-strong flex items-center justify-between bg-surface-alt/40">
+                                    <h2 className="text-base font-black text-text-primary flex items-center gap-3">
+                                        <span className="text-xl">📒</span> Field Ledger
                                     </h2>
-                                    <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-background border border-border-subtle text-text-muted">
+                                    <span className="text-[10px] font-black px-2.5 py-1 rounded-full bg-accent text-background border border-accent/20">
                                         {watchlist.size}
                                     </span>
                                 </div>
 
                                 {/* Body */}
-                                <div className="p-4 overflow-y-auto flex-1 custom-scrollbar">
+                                <div className="p-4 overflow-y-auto flex-1 custom-scrollbar space-y-3">
                                     {watchlist.size === 0 ? (
-                                        <div className="text-center py-10 px-4 bg-background rounded-xl border border-border-subtle">
-                                            <p className="text-3xl mb-3 opacity-40">👀</p>
-                                            <p className="text-xs text-text-muted leading-relaxed font-medium">
-                                                Your watchlist is empty. Click the star icon on any card to get alerted here when it arrives.
+                                        <div className="text-center py-12 px-6 bg-surface-alt/20 rounded-2xl border border-dashed border-border-strong">
+                                            <p className="text-3xl mb-4 opacity-30">📂</p>
+                                            <p className="text-xs text-text-muted font-medium leading-relaxed">
+                                                Your inventory ledger is empty. Star items in the main terminal to track them.
                                             </p>
                                         </div>
                                     ) : (
-                                        <div className="space-y-2.5 pr-1">
-                                            {[...watchlist].map(name => {
-                                                const inStockItem = watchedInStock.find(i => i.name === name);
-                                                const isAvail = !!inStockItem;
-                                                const rarity = inStockItem ? getItemRarity(inStockItem.name, inStockItem.category) : "Common";
+                                        [...watchlist].map(name => {
+                                            const inStockItem = watchedInStock.find(i => i.name === name);
+                                            const isAvail = !!inStockItem;
+                                            const rarity = inStockItem ? getItemRarity(inStockItem.name, inStockItem.category) : "Common";
 
-                                                return (
-                                                    <div key={name} className={`flex items-center justify-between p-3 rounded-xl border text-sm transition-all
-                            ${isAvail ? 'bg-accent-soft/30 border-accent/40 shadow-[0_0_15px_rgba(74,222,128,0.1)]' : 'bg-background border-border-subtle opacity-60'}`}>
-
-                                                        <div className="flex flex-col min-w-0 pr-2">
-                                                            <span className={`font-semibold truncate ${isAvail ? 'text-text-primary' : 'text-text-muted'}`} title={name}>{name}</span>
-                                                            <span className="text-[10px] text-text-muted uppercase tracking-wider font-bold mt-0.5">
-                                                                {isAvail ? (
-                                                                    <span className="text-accent flex items-center gap-1">
-                                                                        <span className={`w-1.5 h-1.5 rounded-full ${RARITY_DOTS[rarity]}`}></span>
-                                                                        In Stock
-                                                                    </span>
-                                                                ) : (
-                                                                    "Waiting..."
-                                                                )}
-                                                            </span>
-                                                        </div>
-
-                                                        {isAvail ? (
-                                                            <div className="shrink-0 flex flex-col items-end">
-                                                                <span className="text-lg leading-none mb-1 opacity-80">{inStockItem.emoji}</span>
-                                                                <span className="text-[10px] font-mono font-bold text-accent bg-accent/10 px-1.5 py-0.5 rounded border border-accent/20">
-                                                                    ×{inStockItem.quantity}
+                                            return (
+                                                <div key={name} className={`flex items-center justify-between p-3.5 rounded-2xl border text-sm transition-all
+                        ${isAvail ? 'bg-accent/10 border-accent/40 shadow-sm' : 'bg-surface-alt/30 border-border-strong opacity-60'}`}>
+                                                    <div className="flex flex-col min-w-0 pr-2">
+                                                        <span className="font-bold truncate text-text-primary" title={name}>{name}</span>
+                                                        <span className="text-[9px] uppercase tracking-widest font-black mt-1">
+                                                            {isAvail ? (
+                                                                <span className="text-accent flex items-center gap-1.5">
+                                                                    <span className={`w-1.5 h-1.5 rounded-full ${RARITY_DOTS[rarity]}`}></span>
+                                                                    Detected
                                                                 </span>
-                                                            </div>
-                                                        ) : (
-                                                            <span className="shrink-0 w-2 h-2 rounded-full bg-border-strong animate-pulse"></span>
-                                                        )}
+                                                            ) : (
+                                                                <span className="text-text-muted">Scanning...</span>
+                                                            )}
+                                                        </span>
                                                     </div>
-                                                );
-                                            })}
-                                        </div>
+                                                    {isAvail ? (
+                                                        <div className="text-right">
+                                                            <div className="text-lg mb-0.5">{inStockItem.emoji}</div>
+                                                            <div className="text-[10px] font-mono font-black text-accent">×{inStockItem.quantity}</div>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-border-strong animate-pulse"></div>
+                                                    )}
+                                                </div>
+                                            );
+                                        })
                                     )}
                                 </div>
                             </div>
-
                         </div>
                     </aside>
                 </div>
-                <div className="mt-20 border-t border-white/5 pt-14 space-y-8">
 
+                {/* ── Section 2, 3, 4: Content Hub Entry Points ────────────────────────── */}
+                <div className="mt-20 flex lg:grid lg:grid-cols-3 gap-8 overflow-x-auto lg:overflow-x-visible snap-x snap-mandatory lg:snap-none pb-8 lg:pb-0 scrollbar-hide -mx-4 px-4 lg:mx-0 lg:px-0">
+                    <Link href="/items/lucky-clover" className="group rounded-3xl border border-border-strong bg-surface/40 p-8 transition-all hover:border-accent/40 hover:bg-surface-alt shadow-sm min-w-[85vw] lg:min-w-0 snap-center">
+                        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-accent">Intelligence Brief</p>
+                        <h3 className="mt-4 text-2xl font-black text-text-primary group-hover:text-accent transition font-serif italic">The Item Ledger</h3>
+                        <p className="mt-3 text-sm leading-relaxed text-text-secondary font-medium">Discover essential targets worth your tracking time, featured for their strategic value in the upcoming harvest.</p>
+                        <div className="mt-6 flex items-center gap-2 text-accent text-xs font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
+                            Open Investigation <span>→</span>
+                        </div>
+                    </Link>
+                    <Link href="/guides/how-garden-horizons-stock-works" className="group rounded-3xl border border-border-strong bg-surface/40 p-8 transition-all hover:border-accent/40 hover:bg-surface-alt shadow-sm min-w-[85vw] lg:min-w-0 snap-center">
+                        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-accent">Field Manual</p>
+                        <h3 className="mt-4 text-2xl font-black text-text-primary group-hover:text-accent transition font-serif italic">Operational Manual</h3>
+                        <p className="mt-3 text-sm leading-relaxed text-text-secondary font-medium">Master the shop rotation mechanics, learn when the Traveling Merchant arrives, and optimize your restock windows.</p>
+                        <div className="mt-6 flex items-center gap-2 text-accent text-xs font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
+                            Consult Manual <span>→</span>
+                        </div>
+                    </Link>
+                    <Link href="/categories/seeds" className="group rounded-3xl border border-border-strong bg-surface/40 p-8 transition-all hover:border-accent/40 hover:bg-surface-alt shadow-sm min-w-[85vw] lg:min-w-0 snap-center">
+                        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-accent">Market Protocol</p>
+                        <h3 className="mt-4 text-2xl font-black text-text-primary group-hover:text-accent transition font-serif italic">The Seed Exchange</h3>
+                        <p className="mt-3 text-sm leading-relaxed text-text-secondary font-medium">Browse high-priority seed catalogs and featured gear designed to maximize your gardening efficiency through live tracking.</p>
+                        <div className="mt-6 flex items-center gap-2 text-accent text-xs font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
+                            Enter Exchange <span>→</span>
+                        </div>
+                    </Link>
+                </div>
+
+                {/* ── Section 6: Field Guide & Operational FAQ ─────────────────────── */}
+                <div className="mt-24 space-y-12 border-t border-border-strong pt-16">
+                    
                     {/* What is it */}
-                    <div className="rounded-2xl border border-white/8 bg-white/[0.02] p-8 flex flex-col items-start gap-4">
+                    <div className="rounded-3xl border border-border-strong bg-surface/40 p-10 flex flex-col items-start gap-6 shadow-sm">
                         <div>
                             <h2 className="text-xl font-bold text-green-400 mb-4">What is Garden Horizons Stock Notifier?</h2>
                             <p className="text-gray-400 text-sm leading-7">
-                                Garden Horizons Stock Notifier is a free real-time stock tracking tool for the popular Roblox game
-                                Garden Horizons. Our tracker monitors the in-game shop inventory and shows you exactly which items,
-                                seeds, tools, and special items are currently available for purchase &mdash; updated every 5 minutes to
+                                Garden Horizons Stock Notifier is a free real-time stock tracking tool for the popular Roblox game 
+                                Garden Horizons. Our tracker monitors the in-game shop inventory and shows you exactly which items, 
+                                seeds, tools, and special items are currently available for purchase &mdash; updated every 5 minutes to 
                                 match the game&apos;s stock rotation cycle.
                             </p>
                             <p className="text-gray-400 text-sm leading-7 mt-3">
-                                Garden Horizons is one of the most popular farming and gardening games on Roblox, where players grow
-                                crops, decorate their gardens, and collect rare items. The in-game shop rotates its stock every 5
-                                minutes, making it difficult for players to catch rare items like the Golden Sunflower Seeds, Lucky
+                                Garden Horizons is one of the most popular farming and gardening games on Roblox, where players grow 
+                                crops, decorate their gardens, and collect rare items. The in-game shop rotates its stock every 5 
+                                minutes, making it difficult for players to catch rare items like the Golden Sunflower Seeds, Lucky 
                                 Clover, or Weather Machine without a tracking tool.
                             </p>
                         </div>
-                        <a href="/grow-a-garden-stock-tracker" className="text-green-400 hover:text-green-300 transition-colors text-sm font-semibold underline underline-offset-4">Learn more about the Grow a Garden stock tracker</a>
+                        <Link href="/grow-a-garden-stock-tracker" className="text-green-400 hover:text-green-300 transition-colors text-sm font-semibold underline underline-offset-4">Learn more about the Grow a Garden stock tracker</Link>
                     </div>
 
-                    {/* How to use + Rarities */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="rounded-2xl border border-white/8 bg-white/[0.02] p-8">
-                            <h2 className="text-xl font-bold text-green-400 mb-5">How to Use the Stock Notifier</h2>
-                            <ol className="space-y-3 text-sm text-gray-400">
+                    {/* Tactics & Rarities */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div className="rounded-3xl border border-border-strong bg-surface/40 p-10 shadow-sm">
+                            <h2 className="text-2xl font-black text-text-primary mb-8 font-serif italic border-b border-border-strong pb-4">How to Use the Stock Notifier</h2>
+                            <div className="space-y-6">
                                 {([
                                     ["Check Current Stock", "See all items currently in the shop, updated in real-time."],
                                     ["Use Filters", "Filter by category (Seeds, Gear, Eggs, Honey, Cosmetics) or search by name."],
                                     ["Watch the Countdown", "Each shop section shows when the next stock rotation happens."],
-                                    ["Star Items", "Click \u2606 on any card to watch it — get an alert at the top when it\'s in stock."],
-                                    ["Share with Friends", "Share current stock alerts with friends on Discord or social media."],
+                                    ["Star Your Targets", "Watch items you want — instantly alerted when they appear in stock."],
                                 ] as [string, string][]).map(([title, desc], i) => (
-                                    <li key={i} className="flex gap-3">
-                                        <span className="flex-shrink-0 w-5 h-5 mt-0.5 rounded-full bg-green-500/15 border border-green-500/30 text-green-400 text-xs font-bold flex items-center justify-center">{i + 1}</span>
-                                        <span><span className="text-gray-200 font-medium">{title}</span> &mdash; {desc}</span>
-                                    </li>
+                                    <div key={i} className="flex gap-5">
+                                        <span className="flex-shrink-0 w-8 h-8 rounded-xl bg-accent/20 border border-accent/40 text-accent text-xs font-bold flex items-center justify-center font-mono">0{i + 1}</span>
+                                        <div className="space-y-1">
+                                            <h4 className="text-text-primary font-bold text-sm tracking-wide">{title}</h4>
+                                            <p className="text-text-secondary text-xs leading-relaxed font-medium">{desc}</p>
+                                        </div>
+                                    </div>
                                 ))}
-                            </ol>
+                            </div>
                         </div>
-                        <div className="rounded-2xl border border-white/8 bg-white/[0.02] p-8 flex flex-col">
-                            <h2 className="text-xl font-bold text-green-400 mb-5">Garden Horizons Item Rarities</h2>
-                            <ul className="space-y-3 text-sm flex-1">
+
+                        <div className="rounded-3xl border border-border-strong bg-surface/40 p-10 shadow-sm flex flex-col">
+                            <h2 className="text-2xl font-black text-text-primary mb-8 font-serif italic border-b border-border-strong pb-4">Item Rarities</h2>
+                            <div className="space-y-5 flex-1">
                                 {([
-                                    ["text-gray-300", "⬜", "Common (Gray)", "Basic items always available. Low cost, great for getting started."],
-                                    ["text-green-400", "🟢", "Uncommon (Green)", "Slightly better items that appear frequently. Good value."],
-                                    ["text-blue-400", "🔵", "Rare (Blue)", "Desirable items that don\'t appear every rotation. Worth grabbing!"],
-                                    ["text-purple-400", "🟣", "Epic (Purple)", "Powerful items that appear infrequently. Usually cost Gems."],
-                                    ["text-yellow-400", "🟡", "Legendary (Gold)", "The rarest and most valuable items. They sell out in seconds!"],
-                                ] as [string, string, string, string][]).map(([color, dot, label, desc]) => (
-                                    <li key={label} className="flex gap-3 text-gray-400">
-                                        <span className="text-lg leading-5 mt-0.5">{dot}</span>
-                                        <span><span className={`font-semibold ${color}`}>{label}</span> &mdash; {desc}</span>
-                                    </li>
+                                    ["text-rarity-common", "○", "Common (Gray)", "Basic items always available. Low cost, great for getting started."],
+                                    ["text-rarity-uncommon", "◍", "Uncommon (Green)", "Slightly better items that appear frequently. Good value."],
+                                    ["text-rarity-rare", "◎", "Rare (Blue)", "Desirable items that don't appear every rotation. Worth grabbing!"],
+                                    ["text-rarity-epic", "◉", "Epic (Purple)", "Powerful items that appear infrequently. Usually cost Gems."],
+                                    ["text-rarity-legendary", "✦", "Legendary (Gold)", "The rarest and most valuable items. They sell out in seconds!"],
+                                ] as [string, string, string, string][]).map(([color, icon, label, desc]) => (
+                                    <div key={label} className="flex gap-5 group">
+                                        <span className={`text-xl ${color} transition-transform group-hover:scale-125`}>{icon}</span>
+                                        <div className="space-y-1">
+                                            <h4 className={`font-black text-xs uppercase tracking-widest ${color}`}>{label}</h4>
+                                            <p className="text-text-secondary text-[11px] leading-relaxed font-medium">{desc}</p>
+                                        </div>
+                                    </div>
                                 ))}
-                            </ul>
-                            <div className="mt-6 flex flex-col xl:flex-row gap-4">
-                                <a href="/garden-horizons-item-rarities" className="text-green-400 hover:text-green-300 transition-colors text-sm font-semibold underline underline-offset-4">Learn more about Garden Horizons item rarities</a>
-                                <a href="/legendary-items" className="text-yellow-400 hover:text-yellow-300 transition-colors text-sm font-semibold underline underline-offset-4">See more about legendary items</a>
                             </div>
                         </div>
                     </div>
 
-                    {/* Tips */}
-                    <div className="rounded-2xl border border-white/8 bg-white/[0.02] p-8">
-                        <h2 className="text-xl font-bold text-green-400 mb-5">Tips for Getting Rare Items</h2>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {([
-                                ["\uD83D\uDD04", "Check Every Rotation", "Stock changes every few minutes. Check often for the best chances."],
-                                ["\u2B50", "Star Your Targets", "Watch items you want — instantly alerted when they appear in stock."],
-                                ["\uD83D\uDEB6", "Watch the Merchant", "The traveling merchant carries exclusive limited-time items. Don\'t miss them!"],
-                                ["\u26A1", "Act Fast", "Rare items have very limited quantity. Buy immediately when you see them."],
-                                ["\uD83D\uDCAC", "Join the Community", "Follow Garden Horizons Discord for additional stock alerts and tips."],
-                            ] as [string, string, string][]).map(([icon, title, desc]) => (
-                                <div key={title} className="rounded-xl border border-white/5 bg-white/[0.015] p-4 flex flex-col justify-between">
-                                    <div>
-                                        <div className="text-2xl mb-2">{icon}</div>
-                                        <div className="font-semibold text-gray-200 text-sm mb-1">{title}</div>
-                                        <div className="text-gray-500 text-xs leading-5">{desc}</div>
-                                    </div>
-                                    {title === "Watch the Merchant" && (
-                                        <a href="/traveling-merchant" className="mt-3 text-green-400 hover:text-green-300 transition-colors text-xs font-semibold underline underline-offset-2 block w-max">Learn more about the Traveling Merchant</a>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                        <div className="mt-6">
-                            <a href="/how-to-get-rare-items" className="text-green-400 hover:text-green-300 transition-colors text-sm font-semibold underline underline-offset-4">See the full guide on getting rare items</a>
-                        </div>
-                    </div>
-
-                    {/* FAQ */}
-                    <div className="rounded-2xl border border-white/8 bg-white/[0.02] p-8 flex flex-col items-start gap-4">
-                        <h2 className="text-xl font-bold text-green-400 mb-2">Frequently Asked Questions</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+                    {/* FAQ Terminal */}
+                    <div className="rounded-3xl border border-border-strong bg-accent-soft/5 p-10 shadow-inner">
+                        <h2 className="text-3xl font-black text-text-primary mb-10 font-serif italic text-center text-accent">Frequently Asked Questions</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
                             {([
                                 ["Is Garden Horizons Stock Notifier free?", "Yes! Completely free to use. No registration, no downloads, no hidden fees."],
                                 ["How often does the stock update?", "Our tracker refreshes automatically every 30 seconds to show you the latest stock."],
-                                ["Can I get push notifications?", "We\'re working on push notifications. For now, bookmark this page or join our Discord for alerts."],
                                 ["Is this affiliated with Garden Horizons?", "No. This is a fan-made tool. Not affiliated with Roblox Corporation or the game developers."],
                                 ["How accurate is the stock data?", "We use real-time data from the GAG Stock API, updated every 30 seconds."],
                                 ["Does this work on mobile?", "Yes! Fully responsive and works perfectly on phones, tablets, and desktop computers."],
-                                ["What is the rarest item in Garden Horizons?", "Legendary items like the Lucky Clover, Weather Machine, and Golden Watering Can. They have very limited stock."],
                             ] as [string, string][]).map(([q, a]) => (
-                                <div key={q} className="border-l-2 border-green-500/30 pl-4">
-                                    <div className="font-semibold text-gray-200 text-sm mb-1">{q}</div>
-                                    <div className="text-gray-500 text-xs leading-5">{a}</div>
+                                <div key={q} className="relative pl-6 border-l-2 border-accent/30 group">
+                                    <div className="absolute -left-[2px] top-0 h-4 w-0.5 bg-accent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                    <h4 className="font-bold text-text-primary text-sm mb-2 group-hover:text-accent transition-colors">{q}</h4>
+                                    <p className="text-text-secondary text-xs leading-relaxed font-medium italic opacity-80">{a}</p>
                                 </div>
                             ))}
                         </div>
-                        <a href="/faq" className="mt-4 text-green-400 hover:text-green-300 transition-colors text-sm font-semibold underline underline-offset-4">View the full FAQ</a>
+                        <div className="mt-12 pt-8 border-t border-accent/10 text-center">
+                            <Link href="/faq" className="text-accent hover:text-accent-hover text-sm font-black uppercase tracking-widest underline underline-offset-8">View the full FAQ</Link>
+                        </div>
                     </div>
 
                 </div>

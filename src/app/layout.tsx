@@ -1,7 +1,9 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://gardenhorizonstocknotifier.com"),
   title: "Garden Horizons Stock Notifier - Live Roblox Item Stock Tracker",
   description:
     "Free real-time Garden Horizons stock tracker. Get instant notifications when rare items, seeds, and tools are in stock. Live inventory updates every 5 minutes.",
@@ -37,6 +39,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className="dark">
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet" />
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-XWNM5789FE" />
         <script dangerouslySetInnerHTML={{ __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-XWNM5789FE');` }} />
         <script
@@ -55,24 +60,23 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
       </head>
-      <body className="bg-[#080d08] text-gray-100 min-h-screen antialiased">
-        <nav className="border-b border-white/5 bg-[#080d08]/80 backdrop-blur-sm sticky top-0 z-50">
-          <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-            <a href="/" className="flex items-center gap-2">
-              <span className="text-2xl">🌱</span>
+      <body className="min-h-screen antialiased selection:bg-accent/30 selection:text-accent font-sans">
+        <nav className="border-b border-border-strong/50 bg-background/80 backdrop-blur-md sticky top-0 z-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+            <Link href="/" className="flex items-center gap-2 group">
+              <span className="text-xl group-hover:rotate-12 transition-transform duration-300">🌱</span>
               <span className="font-bold text-lg text-green-500">Garden Horizons Stock Notifier</span>
-            </a>
+            </Link>
             <div className="flex gap-4 text-sm text-gray-500">
-              <a href="/" className="hover:text-green-500 transition">Live Stock</a>
-              <a href="/about" className="hover:text-green-500 transition">About</a>
+              <Link href="/" className="hover:text-green-500 transition">Live Stock</Link>
+              <Link href="/about" className="hover:text-green-500 transition">About</Link>
             </div>
           </div>
         </nav>
         <main>{children}</main>
-        <footer className="border-t border-white/5 mt-16 py-10 text-sm text-gray-600 bg-black/20">
-          <div className="max-w-6xl mx-auto px-4">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 mb-8">
-              {/* Brand */}
+        <footer className="border-t border-border-strong/30 mt-24 py-16 bg-surface/30">
+          <div className="max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
               <div>
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-2xl">🌱</span>
@@ -82,19 +86,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   Free real-time Grow a Garden stock tracker. Never miss seeds, gear, eggs, or honey again.
                 </p>
               </div>
-              {/* Quick links */}
               <div>
                 <p className="font-semibold text-gray-500 mb-3 text-xs uppercase tracking-wider">Quick Links</p>
                 <ul className="space-y-2 text-xs">
-                  <li><a href="/" className="hover:text-green-400 transition">🏠 Live Stock</a></li>
-                  <li><a href="/beginner-guide" className="hover:text-green-400 transition">📚 Guides</a></li>
-                  <li><a href="/blog" className="hover:text-green-400 transition">📝 Blog</a></li>
-                  <li><a href="/about" className="hover:text-green-400 transition">ℹ️ About</a></li>
-                  <li><a href="/privacy" className="hover:text-green-400 transition">🔒 Privacy Policy</a></li>
-                  <li><a href="/terms" className="hover:text-green-400 transition">📄 Terms of Service</a></li>
+                  <li><Link href="/" className="hover:text-green-400 transition">🏠 Live Stock</Link></li>
+                  <li><Link href="/beginner-guide" className="hover:text-green-400 transition">📚 Guides</Link></li>
+                  <li><Link href="/blog" className="hover:text-green-400 transition">📝 Blog</Link></li>
+                  <li><Link href="/about" className="hover:text-green-400 transition">ℹ️ About</Link></li>
+                  <li><Link href="/privacy" className="hover:text-green-400 transition">🔒 Privacy Policy</Link></li>
+                  <li><Link href="/terms" className="hover:text-green-400 transition">📄 Terms of Service</Link></li>
                 </ul>
               </div>
-              {/* Data source */}
               <div>
                 <p className="font-semibold text-gray-500 mb-3 text-xs uppercase tracking-wider">Data Source</p>
                 <p className="text-xs leading-5 text-gray-700">
@@ -114,18 +116,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 </p>
               </div>
             </div>
-            {/* Bottom bar */}
             <div className="border-t border-white/5 pt-5 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-gray-800">
               <p>© {new Date().getFullYear()} Garden Horizons Stock Notifier. All rights reserved.</p>
               <div className="flex gap-4">
-                <a href="/privacy" className="hover:text-gray-500 transition">Privacy</a>
-                <a href="/terms" className="hover:text-gray-500 transition">Terms</a>
+                <Link href="/privacy" className="hover:text-gray-500 transition">Privacy</Link>
+                <Link href="/terms" className="hover:text-gray-500 transition">Terms</Link>
               </div>
             </div>
           </div>
         </footer>
       </body>
-
     </html>
   );
 }
