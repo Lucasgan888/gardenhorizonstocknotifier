@@ -101,18 +101,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 </ul>
               </div>
               <div>
-                <p className="font-semibold text-gray-500 mb-3 text-xs uppercase tracking-wider">Data Source</p>
+                <p className="font-semibold text-gray-500 mb-3 text-xs uppercase tracking-wider">System Status</p>
+                <p className="text-xs leading-5 text-yellow-600 font-semibold mb-2">
+                  ⚠️ System under maintenance
+                </p>
                 <p className="text-xs leading-5 text-gray-700">
-                  Stock data provided by{" "}
-                  <a
-                    href="https://gagstock.gleeze.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-green-700 hover:text-green-500 transition underline underline-offset-2"
-                  >
-                    GAG Stock API
-                  </a>
-                  , auto-refreshed every 30 seconds.
+                  We're setting up our Discord bot to provide real-time stock data. Stock tracking will be available once the bot is authorized by the Garden Horizons server.
                 </p>
                 <p className="text-xs mt-2 text-gray-800">
                   Unofficial fan-made tool. Not affiliated with Roblox Corporation or the game developers.
