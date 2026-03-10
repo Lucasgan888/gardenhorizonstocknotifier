@@ -18,11 +18,11 @@ type Rarity = "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary";
 // ─── Pseudo Rarity Logic ──────────────────────────────────────────────────────
 const LEGENDARIES = new Set(["Lucky Clover", "Weather Machine", "Golden Watering Can", "Golden Sunflower Seeds"]);
 
-function getItemRarity(name: string, category: string): Rarity {
+function getItemRarity(name: string, category?: string): Rarity {
     if (LEGENDARIES.has(name) || name.includes("Golden") || name.includes("Diamond")) return "Legendary";
     if (name.includes("Ruby") || name.includes("Emerald") || name.includes("Magic")) return "Epic";
     if (category === "Traveling Merchant") return "Rare";
-    const hash = (name.length * 7 + category.length * 3) % 100;
+    const hash = (name.length * 7 + (category?.length || 0) * 3) % 100;
     if (hash > 85) return "Epic";
     if (hash > 60) return "Rare";
     if (hash > 30) return "Uncommon";
@@ -81,11 +81,7 @@ function StockCard({
                         "border-border-subtle bg-surface-alt/50 text-text-muted";
 
     return (
-        <motion.div
-            layout
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
+        <div
             className={`relative flex items-center gap-4 p-4 rounded-2xl border bg-surface transition-all duration-300 group shadow-sm
       ${isWatchedInStock ? 'border-accent ring-1 ring-accent/20 bg-accent-soft/10' : 'border-border-strong hover:border-accent/40 hover:bg-surface-alt'}`}
         >
@@ -121,7 +117,7 @@ function StockCard({
                     ×{item.quantity}
                 </div>
             </div>
-        </motion.div>
+        </div>
     );
 }
 function RarityLegend() {
@@ -143,16 +139,43 @@ function RarityLegend() {
 const fetcher = () => fetchGardenStock();
 
 export default function GardenHorizonsStockNotifier() {
-    // Replace manual useEffect polling with useSWR
-    const { data: stock, error: swrError, isLoading, isValidating, mutate } = useSWR<GardenStock>(
-        'garden-stock',
-        fetcher,
-        {
-            refreshInterval: 30000,
-            revalidateOnFocus: true,
-            errorRetryCount: 3
-        }
-    );
+    // Mock data for maintenance mode
+    const mockStock: GardenStock = {
+        updatedAt: new Date().toISOString(),
+        seed: {
+            items: [
+                { name: "Carrot", quantity: 0, emoji: "🥕", category: "Seeds" },
+                { name: "Strawberry", quantity: 0, emoji: "🍓", category: "Seeds" },
+                { name: "Tomato", quantity: 0, emoji: "🍅", category: "Seeds" },
+                { name: "Corn", quantity: 0, emoji: "🌽", category: "Seeds" },
+                { name: "Banana", quantity: 0, emoji: "🍌", category: "Seeds" },
+                { name: "Mushroom", quantity: 0, emoji: "🍄", category: "Seeds" },
+                { name: "Onion", quantity: 0, emoji: "🧅", category: "Seeds" },
+            ],
+            countdown: null
+        },
+        egg: { items: [], countdown: null },
+        gear: {
+            items: [
+                { name: "Watering Can", quantity: 0, emoji: "💧", category: "Gear" },
+                { name: "Trowel", quantity: 0, emoji: "🔨", category: "Gear" },
+                { name: "Golden Hoe", quantity: 0, emoji: "⚒️", category: "Gear" },
+                { name: "Lucky Clover", quantity: 0, emoji: "🍀", category: "Gear" },
+                { name: "Weather Machine", quantity: 0, emoji: "🌦️", category: "Gear" },
+            ],
+            countdown: null
+        },
+        honey: { items: [], countdown: null },
+        cosmetics: { items: [], countdown: null },
+        travelingMerchant: { items: [], countdown: null }
+    };
+
+    // Use mock data instead of API during maintenance
+    const stock = mockStock;
+    const swrError = null;
+    const isLoading = false;
+    const isValidating = false;
+    const mutate = () => {};
 
     const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
     const [toastMessage, setToastMessage] = useState<{ title: string, msg: string, id: number } | null>(null);
@@ -231,7 +254,6 @@ export default function GardenHorizonsStockNotifier() {
 
     // Derived State
     const allItems = useMemo(() => {
-        if (!stock) return [];
         return [
             ...stock.seed.items,
             ...stock.egg.items,
@@ -267,7 +289,6 @@ export default function GardenHorizonsStockNotifier() {
     const TABS: (ItemCategory | "All")[] = ["All", "Seeds", "Eggs", "Gear", "Honey", "Cosmetics", "Traveling Merchant"];
 
     const getCategoryData = (cat: ItemCategory) => {
-        if (!stock) return null;
         switch (cat) {
             case "Seeds": return stock.seed;
             case "Eggs": return stock.egg;
@@ -442,14 +463,7 @@ export default function GardenHorizonsStockNotifier() {
                         </div>
 
                         {/* States */}
-                        {isLoading && !stock && (
-                            <div className="text-center py-24 text-text-muted bg-surface rounded-2xl border border-border-subtle shadow-xs">
-                                <div className="text-5xl mb-6 animate-bounce">🌱</div>
-                                <p className="text-sm font-medium tracking-wide">Syncing live server data…</p>
-                            </div>
-                        )}
-
-                        {swrError && !stock && (
+                        {swrError && (
                             <div className="text-center py-20 rounded-2xl border border-danger/40 bg-danger/10 shadow-xs">
                                 <p className="text-5xl mb-4">⚠️</p>
                                 <p className="text-danger text-sm font-medium mb-6">Unable to load stock data. Please try again shortly.</p>
@@ -463,7 +477,7 @@ export default function GardenHorizonsStockNotifier() {
                         )}
 
                         {/* Render Category Grids */}
-                        {stock && !isLoading && (
+                        {!swrError && (
                             <div className="space-y-12 mb-8">
                                 {activeCategories.map(cat => {
                                     const cData = getCategoryData(cat);
@@ -478,7 +492,7 @@ export default function GardenHorizonsStockNotifier() {
                                                     <span className="bg-surface border border-border-strong w-10 h-10 flex items-center justify-center rounded-xl text-xl shadow-xs">{CATEGORY_CONFIG[cat].emoji}</span>
                                                     <h2 className="text-xl font-extrabold text-text-primary tracking-wide">{cat}</h2>
                                                 </div>
-                                                {cat === "Traveling Merchant" && stock.travelingMerchant.status === "leaved" ? (
+                                                {cat === "Traveling Merchant" && stock.travelingMerchant?.status === "leaved" ? (
                                                     <span className="text-xs px-3 py-1.5 rounded-full bg-danger/10 border border-danger/30 text-danger font-bold tracking-wide">
                                                         Away · Returns in {stock.travelingMerchant.appearIn}
                                                     </span>
@@ -488,24 +502,19 @@ export default function GardenHorizonsStockNotifier() {
                                             </div>
 
                                             {items.length > 0 ? (
-                                                <motion.div
-                                                    layout
-                                                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3"
-                                                >
-                                                    <AnimatePresence mode="popLayout">
-                                                        {items.map((item) => (
-                                                            <StockCard
-                                                                key={item.name}
-                                                                item={item}
-                                                                watched={watchlist.has(item.name)}
-                                                                onToggleWatch={toggleWatch}
-                                                            />
-                                                        ))}
-                                                    </AnimatePresence>
-                                                </motion.div>
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3">
+                                                    {items.map((item) => (
+                                                        <StockCard
+                                                            key={item.name}
+                                                            item={item}
+                                                            watched={watchlist.has(item.name)}
+                                                            onToggleWatch={toggleWatch}
+                                                        />
+                                                    ))}
+                                                </div>
                                             ) : (
                                                 <div className="py-12 text-center border-2 border-dashed border-border-subtle rounded-2xl bg-surface/30 text-text-muted text-sm font-medium">
-                                                    {cat === "Traveling Merchant" && stock.travelingMerchant.status === "leaved"
+                                                    {cat === "Traveling Merchant" && stock.travelingMerchant?.status === "leaved"
                                                         ? "The merchant has left. Check back when they return!"
                                                         : `No ${cat.toLowerCase()} match your filters.`}
                                                 </div>
