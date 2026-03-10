@@ -290,15 +290,23 @@ export default function GardenHorizonsStockNotifier() {
                 <header className="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-12 gap-8 border-b border-border-strong pb-12">
                     <div className="flex-1">
                         <div className="inline-flex items-center gap-2 mb-3">
-                            <span className="w-2.5 h-2.5 rounded-full bg-accent animate-pulse shadow-focus"></span>
-                            <span className="text-xs font-bold text-accent uppercase tracking-widest leading-none">Live Data Tracker</span>
+                            <span className="w-2.5 h-2.5 rounded-full bg-yellow-500 animate-pulse shadow-focus"></span>
+                            <span className="text-xs font-bold text-yellow-500 uppercase tracking-widest leading-none">System Maintenance</span>
                         </div>
                         <h1 className="text-4xl sm:text-5xl font-extrabold mb-3 tracking-tight">
                             Garden Horizons <span className="text-text-muted font-light">Stock Notifier</span>
                         </h1>
-                        <p className="text-text-muted text-sm max-w-2xl leading-relaxed">
+                        <p className="text-text-muted text-sm max-w-2xl leading-relaxed mb-4">
                             Real-time shop inventory dashboard. Compare prices, hunt legendary items, and never miss the traveling merchant stock rotation.
                         </p>
+                        <div className="flex flex-wrap gap-3 mt-6">
+                            <a href="https://www.roblox.com/games/130594398886540/Garden-Horizons" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-6 py-3 bg-accent text-background font-bold rounded-xl hover:bg-accent/90 transition shadow-lg">
+                                <span>🎮</span> Play Game
+                            </a>
+                            <a href="https://discord.com/invite/gardenhorizons" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-6 py-3 bg-[#5865F2] text-white font-bold rounded-xl hover:bg-[#4752C4] transition shadow-lg">
+                                <span>💬</span> Join Discord
+                            </a>
+                        </div>
                     </div>
 
                     <div className="hidden lg:flex items-center gap-8 bg-surface border border-border-subtle rounded-2xl p-5 shadow-sm">
@@ -512,8 +520,6 @@ export default function GardenHorizonsStockNotifier() {
                         {/* Small subtle data source credit below grid */}
                         <div className="pt-8 mb-4 text-center text-xs text-text-muted border-t border-border-strong flex flex-col sm:flex-row items-center justify-center gap-1.5 opacity-60">
                             <span>Auto-refreshes every 30s</span>
-                            <span className="hidden sm:inline">·</span>
-                            <span>Powered by <a href="https://gagstock.gleeze.com" target="_blank" rel="noopener noreferrer" className="opacity-100 text-accent font-medium hover:underline underline-offset-2">GAG Stock API</a></span>
                         </div>
                     </div>
 

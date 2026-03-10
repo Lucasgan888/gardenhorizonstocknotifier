@@ -67,9 +67,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <span className="text-xl group-hover:rotate-12 transition-transform duration-300">🌱</span>
               <span className="font-bold text-lg text-green-500">Garden Horizons Stock Notifier</span>
             </Link>
-            <div className="flex gap-4 text-sm text-gray-500">
-              <Link href="/" className="hover:text-green-500 transition">Live Stock</Link>
-              <Link href="/about" className="hover:text-green-500 transition">About</Link>
+            <div className="flex gap-6 text-sm text-gray-500">
+              <Link href="/" className="hover:text-green-500 transition font-medium">Live Stock</Link>
+              <Link href="/guides" className="hover:text-green-500 transition font-medium">Guides</Link>
+              <Link href="/blog" className="hover:text-green-500 transition font-medium">Blog</Link>
+              <Link href="/faq" className="hover:text-green-500 transition font-medium">FAQ</Link>
+              <Link href="/about" className="hover:text-green-500 transition font-medium">About</Link>
             </div>
           </div>
         </nav>
