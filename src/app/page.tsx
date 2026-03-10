@@ -90,13 +90,13 @@ function StockCard({
       ${isWatchedInStock ? 'border-accent ring-1 ring-accent/20 bg-accent-soft/10' : 'border-border-strong hover:border-accent/40 hover:bg-surface-alt'}`}
         >
             <div className={`relative flex-shrink-0 w-14 h-14 flex items-center justify-center rounded-xl border shadow-inner transition-transform group-hover:rotate-3 ${rarityStyle}`}>
+                <span className="text-3xl z-10">{item.emoji}</span>
                 <img
                     src={`/items/${item.name.toLowerCase().replace(/ /g, '-')}.webp`}
                     alt={item.name}
-                    className="w-10 h-10 object-contain absolute z-10 transition-transform group-hover:scale-110"
+                    className="w-10 h-10 object-contain absolute z-20 transition-transform group-hover:scale-110"
                     onError={(e) => { e.currentTarget.style.display = 'none'; }}
                 />
-                <span className="text-3xl z-0 opacity-40 group-hover:opacity-100 transition-opacity">{item.emoji}</span>
             </div>
 
             <div className="flex-1 min-w-0">
@@ -313,15 +313,14 @@ export default function GardenHorizonsStockNotifier() {
                         <div className="text-left">
                             <div className="text-text-secondary text-[10px] uppercase tracking-wider mb-1 font-semibold flex items-center justify-between">
                                 <span>API Status</span>
-                                {isValidating && <span className="w-2 h-2 ml-2 rounded-full bg-blue-400 animate-ping" title="Syncing..."></span>}
                             </div>
-                            <div className="font-semibold text-accent flex items-center gap-1.5"><span className="text-lg leading-none">✓</span> Operational</div>
+                            <div className="font-semibold text-yellow-500 flex items-center gap-1.5"><span className="text-lg leading-none">⚠</span> Maintenance</div>
                         </div>
                         <div className="w-px h-10 bg-border-subtle"></div>
                         <div className="text-left">
                             <div className="text-text-secondary text-[10px] uppercase tracking-wider mb-1 font-semibold">Last Sync</div>
                             <div className="font-medium font-mono text-text-primary">
-                                {lastUpdated ? lastUpdated.toLocaleTimeString('en-US') : '--:--:--'}
+                                {lastUpdated ? lastUpdated.toLocaleTimeString('en-US') : 'Pending'}
                             </div>
                         </div>
                     </div>
