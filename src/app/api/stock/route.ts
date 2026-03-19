@@ -2,32 +2,63 @@ import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
+const DEFAULT_STOCK_API_URL = "https://garden-stock-worker.lucasgan2021.workers.dev/stock";
+
+function buildEmptyPayload(error: string) {
+    return {
+        updated_at: new Date().toISOString(),
+        meta: {
+            state: "error",
+            stale: false,
+            source: "unavailable",
+            cached_at: new Date().toISOString(),
+            next_update_at: null,
+            weather: null,
+            error,
+        },
+        data: {
+            seed: { items: [], countdown: null },
+            egg: { items: [], countdown: null },
+            gear: { items: [], countdown: null },
+            honey: { items: [], countdown: null },
+            cosmetics: { items: [], countdown: null },
+            travelingmerchant: { items: [], countdown: null, status: "unknown" },
+        },
+    };
+}
+
 export async function GET() {
     try {
-        // Use Discord bot API (works on Vercel)
-        const botUrl = process.env.DISCORD_BOT_URL || "http://localhost:3001/api/stock";
-        const res = await fetch(botUrl, {
+        const stockUrl =
+            process.env.STOCK_API_URL ||
+            process.env.DISCORD_BOT_URL ||
+            DEFAULT_STOCK_API_URL;
+
+        const res = await fetch(stockUrl, {
             cache: "no-store",
             next: { revalidate: 0 }
         });
 
-        if (!res.ok) throw new Error(`Bot API error: ${res.status}`);
+        const text = await res.text();
+        const payload = text ? JSON.parse(text) : null;
 
-        const data = await res.json();
-        return NextResponse.json(data);
+        if (!res.ok) {
+            return NextResponse.json(
+                payload ?? buildEmptyPayload(`upstream_status_${res.status}`),
+                { status: res.status }
+            );
+        }
+
+        if (!payload) {
+            return NextResponse.json(buildEmptyPayload("empty_upstream_response"), { status: 502 });
+        }
+
+        return NextResponse.json(payload);
     } catch (err) {
         console.error("Stock API error:", err);
-        // Return empty data instead of error for better UX
-        return NextResponse.json({
-            updated_at: new Date().toISOString(),
-            data: {
-                seed: { items: [], countdown: null },
-                egg: { items: [], countdown: null },
-                gear: { items: [], countdown: null },
-                honey: { items: [], countdown: null },
-                cosmetics: { items: [], countdown: null },
-                travelingmerchant: { items: [], countdown: null }
-            }
-        });
+        return NextResponse.json(
+            buildEmptyPayload(err instanceof Error ? err.message : "stock_unavailable"),
+            { status: 503 }
+        );
     }
 }

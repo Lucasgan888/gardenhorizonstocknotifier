@@ -102,11 +102,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </div>
               <div>
                 <p className="font-semibold text-gray-500 mb-3 text-xs uppercase tracking-wider">System Status</p>
-                <p className="text-xs leading-5 text-yellow-600 font-semibold mb-2">
-                  ⚠️ System under maintenance
+                <p className="text-xs leading-5 text-green-700 font-semibold mb-2">
+                  ● Live public feed active
                 </p>
                 <p className="text-xs leading-5 text-gray-700">
-                  We're setting up our Discord bot to provide real-time stock data. Stock tracking will be available once the bot is authorized by the Garden Horizons server.
+                  Live stock data is proxied through our own Worker cache from public stock feeds, so the dashboard can stay fast and available without requiring a Discord bot login.
                 </p>
                 <p className="text-xs mt-2 text-gray-800">
                   Unofficial fan-made tool. Not affiliated with Roblox Corporation or the game developers.

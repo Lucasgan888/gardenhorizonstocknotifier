@@ -51,7 +51,7 @@ export default function FAQPage() {
                     <section className="p-8 bg-surface/40 border border-border-strong rounded-3xl shadow-sm group hover:border-accent/30 transition-colors">
                         <h2 className="text-xl font-bold text-text-primary mb-3 font-serif italic group-hover:text-accent transition-colors">Where does the stock data come from?</h2>
                         <p className="text-text-secondary text-sm leading-relaxed font-medium">
-                            We maintain direct integration with the GAG Stock API. This provides a 100% verified feed of in-game inventory rotations. During game updates or server maintenance, minor latency may occur as systems re-synchronize.
+                            We aggregate public live stock feeds through our own cache layer and normalize them for the site. During upstream outages or game updates, you may briefly see cached data while the feed re-synchronizes.
                         </p>
                     </section>
 

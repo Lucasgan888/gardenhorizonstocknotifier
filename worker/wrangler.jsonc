@@ -1,0 +1,18 @@
+{
+  "name": "garden-stock-worker",
+  "main": "src/index.ts",
+  "compatibility_date": "2024-01-01",
+  "kv_namespaces": [
+    {
+      "binding": "STOCK_KV",
+      "id": "543c8f2220e54b0992ff8b98ffa4ae1e",
+      "preview_id": "3c10ad69bbc141c9a9c3e28bde6426e3"
+    }
+  ],
+  "vars": {
+    "STOCK_SOURCE_URL": "https://gardenhorizonslivestock.com:3010/api/data"
+  },
+  "triggers": {
+    "crons": ["*/1 * * * *"]
+  }
+}

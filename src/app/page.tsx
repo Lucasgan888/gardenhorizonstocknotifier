@@ -7,8 +7,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { BellRing } from 'lucide-react';
 import {
     fetchGardenStock,
+    EMPTY_GARDEN_STOCK,
     CATEGORY_CONFIG,
-    type GardenStock,
     type StockItem,
     type ItemCategory,
 } from "@/lib/stock";
@@ -51,6 +51,18 @@ const RARITY_ORDER: Record<Rarity, number> = {
 
 // ─── UI Components ────────────────────────────────────────────────────────────
 
+function formatLiveCountdown(nextUpdateAt: string | null, nowMs: number): string | null {
+    if (!nextUpdateAt) return null;
+
+    const targetMs = new Date(nextUpdateAt).getTime();
+    if (!Number.isFinite(targetMs)) return null;
+
+    const diffSeconds = Math.max(0, Math.floor((targetMs - nowMs) / 1000));
+    const minutes = Math.floor(diffSeconds / 60);
+    const seconds = diffSeconds % 60;
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+}
+
 function CountdownBadge({ countdown, label }: { countdown: string | null; label: string }) {
     if (!countdown) return null;
     return (
@@ -59,6 +71,10 @@ function CountdownBadge({ countdown, label }: { countdown: string | null; label:
             <span className="font-mono text-accent font-semibold tabular-nums">{countdown}</span>
         </span>
     );
+}
+
+function getTotalQuantity(items: StockItem[]): number {
+    return items.reduce((sum, item) => sum + Math.max(0, item.quantity), 0);
 }
 
 function StockCard({
@@ -71,6 +87,7 @@ function StockCard({
     onToggleWatch: (name: string) => void;
 }) {
     const rarity = getItemRarity(item.name, item.category);
+    const hasStock = item.quantity > 0;
     const isWatchedInStock = watched && item.quantity > 0;
 
     const rarityStyle =
@@ -80,10 +97,16 @@ function StockCard({
                     rarity === "Uncommon" ? "border-rarity-uncommon/40 bg-rarity-uncommon/5 text-rarity-uncommon" :
                         "border-border-subtle bg-surface-alt/50 text-text-muted";
 
+    const cardStateStyle = isWatchedInStock
+        ? "border-accent shadow-[0_0_0_1px_rgba(74,222,128,0.28),0_18px_40px_rgba(22,101,52,0.18)] ring-1 ring-accent/35 bg-[linear-gradient(135deg,rgba(74,222,128,0.14),rgba(20,24,33,0.92))]"
+        : hasStock
+            ? "border-accent/65 shadow-[0_0_0_1px_rgba(74,222,128,0.16),0_14px_34px_rgba(5,28,18,0.18)] ring-1 ring-accent/20 bg-[linear-gradient(135deg,rgba(74,222,128,0.08),rgba(17,24,39,0.96))] hover:border-accent hover:ring-accent/35 hover:bg-[linear-gradient(135deg,rgba(74,222,128,0.14),rgba(20,24,33,0.98))]"
+            : "border-border-strong hover:border-accent/40 hover:bg-surface-alt";
+
     return (
         <div
             className={`relative flex items-center gap-4 p-4 rounded-2xl border bg-surface transition-all duration-300 group shadow-sm
-      ${isWatchedInStock ? 'border-accent ring-1 ring-accent/20 bg-accent-soft/10' : 'border-border-strong hover:border-accent/40 hover:bg-surface-alt'}`}
+      ${cardStateStyle}`}
         >
             <div className={`relative flex-shrink-0 w-14 h-14 flex items-center justify-center rounded-xl border shadow-inner transition-transform group-hover:rotate-3 ${rarityStyle}`}>
                 <img
@@ -113,8 +136,14 @@ function StockCard({
                 >
                     {watched ? "★" : "☆"}
                 </button>
-                <div className="text-xs font-mono font-bold text-text-secondary bg-surface-alt px-2 py-0.5 rounded-md border border-border-strong">
-                    ×{item.quantity}
+                <div className="relative min-w-[86px] overflow-hidden rounded-2xl border border-lime-200/80 bg-[linear-gradient(135deg,rgba(217,249,157,0.98),rgba(163,230,53,0.92))] px-3.5 py-2 text-right shadow-[0_0_0_1px_rgba(190,242,100,0.35),0_0_26px_rgba(163,230,53,0.42),0_12px_24px_rgba(9,16,8,0.28)]">
+                    <span className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.36),transparent_56%)]"></span>
+                    <span className="relative block text-[9px] font-black uppercase tracking-[0.24em] text-lime-950/75">
+                        Stock
+                    </span>
+                    <span className="relative block text-lg font-mono font-black leading-none text-lime-950 tabular-nums drop-shadow-[0_0_12px_rgba(217,249,157,0.65)]">
+                        x{item.quantity}
+                    </span>
                 </div>
             </div>
         </div>
@@ -139,43 +168,19 @@ function RarityLegend() {
 const fetcher = () => fetchGardenStock();
 
 export default function GardenHorizonsStockNotifier() {
-    // Mock data for maintenance mode
-    const mockStock: GardenStock = {
-        updatedAt: new Date().toISOString(),
-        seed: {
-            items: [
-                { name: "Carrot", quantity: 0, emoji: "🥕", category: "Seeds" },
-                { name: "Strawberry", quantity: 0, emoji: "🍓", category: "Seeds" },
-                { name: "Tomato", quantity: 0, emoji: "🍅", category: "Seeds" },
-                { name: "Corn", quantity: 0, emoji: "🌽", category: "Seeds" },
-                { name: "Banana", quantity: 0, emoji: "🍌", category: "Seeds" },
-                { name: "Mushroom", quantity: 0, emoji: "🍄", category: "Seeds" },
-                { name: "Onion", quantity: 0, emoji: "🧅", category: "Seeds" },
-            ],
-            countdown: null
-        },
-        egg: { items: [], countdown: null },
-        gear: {
-            items: [
-                { name: "Watering Can", quantity: 0, emoji: "💧", category: "Gear" },
-                { name: "Trowel", quantity: 0, emoji: "🔨", category: "Gear" },
-                { name: "Golden Hoe", quantity: 0, emoji: "⚒️", category: "Gear" },
-                { name: "Lucky Clover", quantity: 0, emoji: "🍀", category: "Gear" },
-                { name: "Weather Machine", quantity: 0, emoji: "🌦️", category: "Gear" },
-            ],
-            countdown: null
-        },
-        honey: { items: [], countdown: null },
-        cosmetics: { items: [], countdown: null },
-        travelingMerchant: { items: [], countdown: null }
-    };
+    const {
+        data: liveStock,
+        error: swrError,
+        isLoading,
+        isValidating,
+        mutate,
+    } = useSWR("garden-stock", fetcher, {
+        refreshInterval: 30_000,
+        revalidateOnFocus: true,
+        shouldRetryOnError: false,
+    });
 
-    // Use mock data instead of API during maintenance
-    const stock = mockStock;
-    const swrError = null;
-    const isLoading = false;
-    const isValidating = false;
-    const mutate = () => {};
+    const stock = liveStock ?? EMPTY_GARDEN_STOCK;
 
     const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
     const [toastMessage, setToastMessage] = useState<{ title: string, msg: string, id: number } | null>(null);
@@ -189,12 +194,21 @@ export default function GardenHorizonsStockNotifier() {
 
     const [watchlist, setWatchlist] = useState<Set<string>>(new Set());
     const prevWatchedStockRef = useRef<Record<string, number>>({});
+    const [nowMs, setNowMs] = useState(() => Date.now());
 
     useEffect(() => {
         try {
             const saved = localStorage.getItem("gag-watchlist");
             if (saved) setWatchlist(new Set(JSON.parse(saved)));
         } catch { }
+    }, []);
+
+    useEffect(() => {
+        const timer = window.setInterval(() => {
+            setNowMs(Date.now());
+        }, 1000);
+
+        return () => window.clearInterval(timer);
     }, []);
 
     const toggleWatch = useCallback((name: string) => {
@@ -212,14 +226,14 @@ export default function GardenHorizonsStockNotifier() {
 
     // Update timestamp on data arrival & check for new watched restocks
     useEffect(() => {
-        if (stock) {
-            setLastUpdated(new Date());
+        if (liveStock) {
+            setLastUpdated(liveStock.updatedAt ? new Date(liveStock.updatedAt) : new Date());
 
             const prevWatchedStock = prevWatchedStockRef.current;
             const currentStockState: Record<string, number> = {};
             const allItemsFlat = [
-                ...stock.seed.items, ...stock.egg.items, ...stock.gear.items,
-                ...stock.honey.items, ...stock.cosmetics.items, ...stock.travelingMerchant.items
+                ...liveStock.seed.items, ...liveStock.egg.items, ...liveStock.gear.items,
+                ...liveStock.honey.items, ...liveStock.cosmetics.items, ...liveStock.travelingMerchant.items
             ];
 
             let newlyRestocked = 0;
@@ -250,7 +264,7 @@ export default function GardenHorizonsStockNotifier() {
 
             prevWatchedStockRef.current = currentStockState;
         }
-    }, [stock, watchlist]);
+    }, [liveStock, watchlist]);
 
     // Derived State
     const allItems = useMemo(() => {
@@ -271,6 +285,7 @@ export default function GardenHorizonsStockNotifier() {
     // Filter & Sort Logic
     const getFilteredItems = (items: StockItem[]) => {
         const filtered = items.filter((item) => {
+            if (item.quantity <= 0) return false;
             if (search && !item.name.toLowerCase().includes(search.toLowerCase())) return false;
             if (showWatchedOnly && !watchlist.has(item.name)) return false;
             if (rarityFilter !== "All" && getItemRarity(item.name, item.category) !== rarityFilter) return false;
@@ -302,6 +317,50 @@ export default function GardenHorizonsStockNotifier() {
     const activeCategories: ItemCategory[] = categoryFilter === "All"
         ? ["Seeds", "Eggs", "Gear", "Honey", "Cosmetics", "Traveling Merchant"]
         : [categoryFilter];
+    const liveRotationCountdown = useMemo(
+        () => formatLiveCountdown(stock.meta.nextUpdateAt, nowMs),
+        [stock.meta.nextUpdateAt, nowMs]
+    );
+
+    const statusState = swrError
+        ? "error"
+        : isLoading && !liveStock
+            ? "loading"
+            : stock.meta.state === "stale"
+                ? "stale"
+                : "live";
+
+    const statusCopy = statusState === "error"
+        ? {
+            label: "Connection Error",
+            badge: "text-red-500",
+            dot: "bg-red-500",
+            value: "Unavailable",
+            note: "Live stock data is temporarily unavailable.",
+        }
+        : statusState === "loading"
+            ? {
+                label: "Connecting",
+                badge: "text-yellow-500",
+                dot: "bg-yellow-500 animate-pulse",
+                value: "Syncing",
+                note: "Connecting to the live stock feed and loading the latest rotation.",
+            }
+            : statusState === "stale"
+                ? {
+                    label: "Cached Feed",
+                    badge: "text-yellow-500",
+                    dot: "bg-yellow-500",
+                    value: "Degraded",
+                    note: "Showing the latest cached stock while the upstream feed reconnects.",
+                }
+                : {
+                    label: "Live Feed",
+                    badge: "text-green-500",
+                    dot: "bg-green-500",
+                    value: "Live",
+                    note: "Tracking public live-stock data through our Cloudflare Worker cache.",
+                };
 
     return (
         <div className="min-h-screen bg-background text-text-primary font-sans">
@@ -311,14 +370,17 @@ export default function GardenHorizonsStockNotifier() {
                 <header className="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-12 gap-8 border-b border-border-strong pb-12">
                     <div className="flex-1">
                         <div className="inline-flex items-center gap-2 mb-3">
-                            <span className="w-2.5 h-2.5 rounded-full bg-yellow-500 animate-pulse shadow-focus"></span>
-                            <span className="text-xs font-bold text-yellow-500 uppercase tracking-widest leading-none">System Maintenance</span>
+                            <span className={`w-2.5 h-2.5 rounded-full shadow-focus ${statusCopy.dot}`}></span>
+                            <span className={`text-xs font-bold uppercase tracking-widest leading-none ${statusCopy.badge}`}>{statusCopy.label}</span>
                         </div>
                         <h1 className="text-4xl sm:text-5xl font-extrabold mb-3 tracking-tight">
                             Garden Horizons <span className="text-text-muted font-light">Stock Notifier</span>
                         </h1>
                         <p className="text-text-muted text-sm max-w-2xl leading-relaxed mb-4">
                             Real-time shop inventory dashboard. Compare prices, hunt legendary items, and never miss the traveling merchant stock rotation.
+                        </p>
+                        <p className="text-xs max-w-2xl leading-relaxed text-text-secondary">
+                            {statusCopy.note}
                         </p>
                         <div className="flex flex-wrap gap-3 mt-6">
                             <a href="https://www.roblox.com/games/130594398886540/Garden-Horizons" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-6 py-3 bg-accent text-background font-bold rounded-xl hover:bg-accent/90 transition shadow-lg">
@@ -335,7 +397,10 @@ export default function GardenHorizonsStockNotifier() {
                             <div className="text-text-secondary text-[10px] uppercase tracking-wider mb-1 font-semibold flex items-center justify-between">
                                 <span>API Status</span>
                             </div>
-                            <div className="font-semibold text-yellow-500 flex items-center gap-1.5"><span className="text-lg leading-none">⚠</span> Maintenance</div>
+                            <div className={`font-semibold flex items-center gap-1.5 ${statusCopy.badge}`}>
+                                <span className="text-lg leading-none">{statusState === "error" ? "⚠" : statusState === "stale" ? "◔" : "●"}</span>
+                                {statusCopy.value}
+                            </div>
                         </div>
                         <div className="w-px h-10 bg-border-subtle"></div>
                         <div className="text-left">
@@ -463,6 +528,20 @@ export default function GardenHorizonsStockNotifier() {
                         </div>
 
                         {/* States */}
+                        {statusState === "stale" && (
+                            <div className="rounded-2xl border border-yellow-500/30 bg-yellow-500/10 p-4 text-sm text-yellow-200 shadow-xs">
+                                Showing cached stock from our Worker while the public source reconnects.
+                            </div>
+                        )}
+
+                        {isLoading && !liveStock && !swrError && (
+                            <div className="text-center py-20 rounded-2xl border border-border-strong bg-surface/50 shadow-xs">
+                                <p className="text-5xl mb-4">📡</p>
+                                <p className="text-text-primary text-sm font-medium mb-2">Connecting to live stock data...</p>
+                                <p className="text-text-muted text-xs">Fetching the latest public stock rotation and caching it for the dashboard.</p>
+                            </div>
+                        )}
+
                         {swrError && (
                             <div className="text-center py-20 rounded-2xl border border-danger/40 bg-danger/10 shadow-xs">
                                 <p className="text-5xl mb-4">⚠️</p>
@@ -477,12 +556,13 @@ export default function GardenHorizonsStockNotifier() {
                         )}
 
                         {/* Render Category Grids */}
-                        {!swrError && (
+                        {!swrError && !isLoading && (
                             <div className="space-y-12 mb-8">
                                 {activeCategories.map(cat => {
                                     const cData = getCategoryData(cat);
                                     if (!cData) return null;
                                     const items = getFilteredItems(cData.items);
+                                    const totalQuantity = getTotalQuantity(items);
                                     if (items.length === 0 && activeCategories.length > 1) return null; // hide empty categories in 'All' view
 
                                     return (
@@ -490,14 +570,25 @@ export default function GardenHorizonsStockNotifier() {
                                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-1">
                                                 <div className="flex items-center gap-3">
                                                     <span className="bg-surface border border-border-strong w-10 h-10 flex items-center justify-center rounded-xl text-xl shadow-xs">{CATEGORY_CONFIG[cat].emoji}</span>
-                                                    <h2 className="text-xl font-extrabold text-text-primary tracking-wide">{cat}</h2>
+                                                    <div className="flex items-center gap-3">
+                                                        <h2 className="text-xl font-extrabold text-text-primary tracking-wide">{cat}</h2>
+                                                        <span className="rounded-full border border-accent/45 bg-accent-soft px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-accent shadow-[0_0_18px_rgba(74,222,128,0.14)]">
+                                                            {totalQuantity} total stock
+                                                        </span>
+                                                        <span className="rounded-full border border-border-strong bg-surface px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-text-secondary">
+                                                            {items.length} live items
+                                                        </span>
+                                                    </div>
                                                 </div>
                                                 {cat === "Traveling Merchant" && stock.travelingMerchant?.status === "leaved" ? (
                                                     <span className="text-xs px-3 py-1.5 rounded-full bg-danger/10 border border-danger/30 text-danger font-bold tracking-wide">
                                                         Away · Returns in {stock.travelingMerchant.appearIn}
                                                     </span>
                                                 ) : (
-                                                    <CountdownBadge countdown={cData.countdown} label="Refresh in:" />
+                                                    <CountdownBadge
+                                                        countdown={cData.countdown ? (liveRotationCountdown ?? cData.countdown) : null}
+                                                        label="Refresh in:"
+                                                    />
                                                 )}
                                             </div>
 
@@ -697,7 +788,7 @@ export default function GardenHorizonsStockNotifier() {
                                 ["Is Garden Horizons Stock Notifier free?", "Yes! Completely free to use. No registration, no downloads, no hidden fees."],
                                 ["How often does the stock update?", "Our tracker refreshes automatically every 30 seconds to show you the latest stock."],
                                 ["Is this affiliated with Garden Horizons?", "No. This is a fan-made tool. Not affiliated with Roblox Corporation or the game developers."],
-                                ["How accurate is the stock data?", "We use real-time data from the GAG Stock API, updated every 30 seconds."],
+                                ["How accurate is the stock data?", "We proxy public live stock feeds through our own Cloudflare Worker and refresh the dashboard every 30 seconds."],
                                 ["Does this work on mobile?", "Yes! Fully responsive and works perfectly on phones, tablets, and desktop computers."],
                             ] as [string, string][]).map(([q, a]) => (
                                 <div key={q} className="relative pl-6 border-l-2 border-accent/30 group">
@@ -718,4 +809,3 @@ export default function GardenHorizonsStockNotifier() {
         </div>
     );
 }
-

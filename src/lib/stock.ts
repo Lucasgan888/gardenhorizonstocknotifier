@@ -1,5 +1,4 @@
-// Garden Horizons Stock Data Types & API Client
-// Powered by GAG Stock API: https://gagstock.gleeze.com
+// Garden Horizons stock client shared by the homepage and API proxy.
 
 export type ItemCategory = "Seeds" | "Gear" | "Eggs" | "Honey" | "Cosmetics" | "Traveling Merchant";
 
@@ -18,8 +17,24 @@ export interface CategoryStock {
   merchantName?: string;
 }
 
+export interface StockMeta {
+  state: "live" | "stale" | "error";
+  stale: boolean;
+  source: string;
+  cachedAt: string;
+  nextUpdateAt: string | null;
+  weather?: {
+    type: string;
+    effects: string[];
+    active: boolean;
+    color?: string;
+  } | null;
+  error?: string;
+}
+
 export interface GardenStock {
   updatedAt: string;
+  meta: StockMeta;
   seed: CategoryStock;
   egg: CategoryStock;
   gear: CategoryStock;
@@ -27,6 +42,24 @@ export interface GardenStock {
   cosmetics: CategoryStock;
   travelingMerchant: CategoryStock;
 }
+
+export const EMPTY_GARDEN_STOCK: GardenStock = {
+  updatedAt: "",
+  meta: {
+    state: "error",
+    stale: false,
+    source: "unavailable",
+    cachedAt: "",
+    nextUpdateAt: null,
+    weather: null,
+  },
+  seed: { items: [], countdown: null },
+  egg: { items: [], countdown: null },
+  gear: { items: [], countdown: null },
+  honey: { items: [], countdown: null },
+  cosmetics: { items: [], countdown: null },
+  travelingMerchant: { items: [], countdown: null, status: "unknown" },
+};
 
 export const CATEGORY_CONFIG: Record<ItemCategory, { emoji: string; color: string; border: string; bg: string }> = {
   Seeds: {
@@ -81,7 +114,7 @@ const EMOJI_MAP: Record<string, string> = {
   "Golden Sunflower Seeds": "🌻", "Weather Machine": "🌦️", "Lucky Clover": "🍀"
 };
 
-function mapItems(items: { name: string; quantity: number; emoji: string }[], category: ItemCategory): StockItem[] {
+function mapItems(items: { name: string; quantity: number; emoji?: string }[], category: ItemCategory): StockItem[] {
   return items.map((item) => {
     // Override the generic '❓' or provide one if missing
     let finalEmoji = item.emoji;
@@ -94,12 +127,21 @@ function mapItems(items: { name: string; quantity: number; emoji: string }[], ca
 
 export async function fetchGardenStock(): Promise<GardenStock> {
   const res = await fetch("/api/stock", { next: { revalidate: 0 } });
-  if (!res.ok) throw new Error("Failed to fetch stock data");
-  const json = await res.json();
+  const json = await res.json().catch(() => null);
+  if (!res.ok || !json) throw new Error(json?.meta?.error || "Failed to fetch stock data");
   const d = json.data;
 
   return {
     updatedAt: json.updated_at,
+    meta: {
+      state: json.meta?.state ?? "live",
+      stale: Boolean(json.meta?.stale),
+      source: json.meta?.source ?? "unknown",
+      cachedAt: json.meta?.cached_at ?? "",
+      nextUpdateAt: json.meta?.next_update_at ?? null,
+      weather: json.meta?.weather ?? null,
+      error: json.meta?.error,
+    },
     seed: {
       items: mapItems(d.seed?.items ?? [], "Seeds"),
       countdown: d.seed?.countdown ?? null,

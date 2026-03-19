@@ -51,3 +51,18 @@ stock.db
 # Logs
 dev.log
 *.log
+
+# OpenNext
+.open-next
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+!.env.example
+
+# local AI task artifacts
+.ai/
+
+# worker dependencies
+worker/node_modules/

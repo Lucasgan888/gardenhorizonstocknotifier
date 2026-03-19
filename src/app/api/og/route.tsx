@@ -102,7 +102,7 @@ export async function GET(request: Request) {
                             borderTop: '2px solid rgba(255,255,255,0.1)',
                         }}
                     >
-                        <span style={{ color: '#71717a', fontSize: '32px', fontWeight: 600 }}>gagstock.gleeze.com</span>
+                        <span style={{ color: '#71717a', fontSize: '32px', fontWeight: 600 }}>gardenhorizonstocknotifier.com</span>
                         <span style={{ color: '#4ade80', fontSize: '32px', fontWeight: 600 }}>Auto-refreshes every 30s</span>
                     </div>
                 </div>
