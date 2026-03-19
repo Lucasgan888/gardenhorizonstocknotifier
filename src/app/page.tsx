@@ -73,6 +73,20 @@ function CountdownBadge({ countdown, label }: { countdown: string | null; label:
     );
 }
 
+function formatSyncAge(lastSync: Date | null, nowMs: number): string | null {
+    if (!lastSync) return null;
+
+    const diffSeconds = Math.max(0, Math.floor((nowMs - lastSync.getTime()) / 1000));
+    if (diffSeconds < 5) return "Just now";
+    if (diffSeconds < 60) return `${diffSeconds}s ago`;
+
+    const diffMinutes = Math.floor(diffSeconds / 60);
+    if (diffMinutes < 60) return `${diffMinutes}m ago`;
+
+    const diffHours = Math.floor(diffMinutes / 60);
+    return `${diffHours}h ago`;
+}
+
 function getTotalQuantity(items: StockItem[]): number {
     return items.reduce((sum, item) => sum + Math.max(0, item.quantity), 0);
 }
@@ -168,6 +182,9 @@ function RarityLegend() {
 const fetcher = () => fetchGardenStock();
 
 export default function GardenHorizonsStockNotifier() {
+    const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+    const [toastMessage, setToastMessage] = useState<{ title: string, msg: string, id: number } | null>(null);
+
     const {
         data: liveStock,
         error: swrError,
@@ -178,12 +195,12 @@ export default function GardenHorizonsStockNotifier() {
         refreshInterval: 30_000,
         revalidateOnFocus: true,
         shouldRetryOnError: false,
+        onSuccess: () => {
+            setLastUpdated(new Date());
+        },
     });
 
     const stock = liveStock ?? EMPTY_GARDEN_STOCK;
-
-    const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-    const [toastMessage, setToastMessage] = useState<{ title: string, msg: string, id: number } | null>(null);
 
     // Filters
     const [search, setSearch] = useState("");
@@ -224,11 +241,9 @@ export default function GardenHorizonsStockNotifier() {
         });
     }, []);
 
-    // Update timestamp on data arrival & check for new watched restocks
+    // Check for new watched restocks after live data changes.
     useEffect(() => {
         if (liveStock) {
-            setLastUpdated(liveStock.updatedAt ? new Date(liveStock.updatedAt) : new Date());
-
             const prevWatchedStock = prevWatchedStockRef.current;
             const currentStockState: Record<string, number> = {};
             const allItemsFlat = [
@@ -321,6 +336,10 @@ export default function GardenHorizonsStockNotifier() {
         () => formatLiveCountdown(stock.meta.nextUpdateAt, nowMs),
         [stock.meta.nextUpdateAt, nowMs]
     );
+    const lastSyncAge = useMemo(
+        () => formatSyncAge(lastUpdated, nowMs),
+        [lastUpdated, nowMs]
+    );
 
     const statusState = swrError
         ? "error"
@@ -405,8 +424,11 @@ export default function GardenHorizonsStockNotifier() {
                         <div className="w-px h-10 bg-border-subtle"></div>
                         <div className="text-left">
                             <div className="text-text-secondary text-[10px] uppercase tracking-wider mb-1 font-semibold">Last Sync</div>
-                            <div className="font-medium font-mono text-text-primary">
+                            <div className="font-medium font-mono text-text-primary tabular-nums">
                                 {lastUpdated ? lastUpdated.toLocaleTimeString('en-US') : 'Pending'}
+                            </div>
+                            <div className="mt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-text-secondary">
+                                {lastSyncAge ?? "Waiting"}
                             </div>
                         </div>
                     </div>
