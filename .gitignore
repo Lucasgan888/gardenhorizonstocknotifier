@@ -63,6 +63,7 @@ dev.log
 
 # local AI task artifacts
 .ai/
+.agent
 
 # worker dependencies
 worker/node_modules/
