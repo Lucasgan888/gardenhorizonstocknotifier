@@ -10,6 +10,7 @@ import {
     EMPTY_GARDEN_STOCK,
     CATEGORY_CONFIG,
     type StockItem,
+    type CategoryStock,
     type ItemCategory,
 } from "@/lib/stock";
 
@@ -17,6 +18,7 @@ type Rarity = "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary";
 
 // ─── Pseudo Rarity Logic ──────────────────────────────────────────────────────
 const LEGENDARIES = new Set(["Lucky Clover", "Weather Machine", "Golden Watering Can", "Golden Sunflower Seeds"]);
+const SHOP_CATEGORIES: ItemCategory[] = ["Seeds", "Eggs", "Gear", "Honey", "Cosmetics", "Traveling Merchant"];
 
 function getItemRarity(name: string, category?: string): Rarity {
     if (LEGENDARIES.has(name) || name.includes("Golden") || name.includes("Diamond")) return "Legendary";
@@ -186,7 +188,7 @@ export default function GardenHorizonsStockNotifier() {
 
     // Filters
     const [search, setSearch] = useState("");
-    const [categoryFilter, setCategoryFilter] = useState<ItemCategory | "All">("All");
+    const [categoryFilter, setCategoryFilter] = useState<ItemCategory | null>(null);
     const [rarityFilter, setRarityFilter] = useState<Rarity | "All">("All");
     const [sortOrder, setSortOrder] = useState<"Default" | "Rarity">("Default");
     const [showWatchedOnly, setShowWatchedOnly] = useState(false);
@@ -298,22 +300,34 @@ export default function GardenHorizonsStockNotifier() {
         return filtered;
     };
 
-    const TABS: (ItemCategory | "All")[] = ["All", "Seeds", "Eggs", "Gear", "Honey", "Cosmetics", "Traveling Merchant"];
-
-    const getCategoryData = (cat: ItemCategory) => {
-        switch (cat) {
-            case "Seeds": return stock.seed;
-            case "Eggs": return stock.egg;
-            case "Gear": return stock.gear;
-            case "Honey": return stock.honey;
-            case "Cosmetics": return stock.cosmetics;
-            case "Traveling Merchant": return stock.travelingMerchant;
-        }
+    const categoryDataMap: Record<ItemCategory, CategoryStock> = {
+        Seeds: stock.seed,
+        Eggs: stock.egg,
+        Gear: stock.gear,
+        Honey: stock.honey,
+        Cosmetics: stock.cosmetics,
+        "Traveling Merchant": stock.travelingMerchant,
     };
 
-    const activeCategories: ItemCategory[] = categoryFilter === "All"
-        ? ["Seeds", "Eggs", "Gear", "Honey", "Cosmetics", "Traveling Merchant"]
-        : [categoryFilter];
+    const getCategoryData = (cat: ItemCategory) => categoryDataMap[cat];
+
+    const visibleCategories = SHOP_CATEGORIES.filter((cat) => {
+        const cData = categoryDataMap[cat];
+        const hasLiveItems = cData.items.some((item) => item.quantity > 0);
+        const hasMerchantSignal =
+            cat === "Traveling Merchant" &&
+            Boolean((cData.status && cData.status !== "unknown") || cData.appearIn || cData.merchantName);
+
+        return hasLiveItems || hasMerchantSignal;
+    });
+
+    useEffect(() => {
+        if (categoryFilter && !visibleCategories.includes(categoryFilter)) {
+            setCategoryFilter(null);
+        }
+    }, [categoryFilter, visibleCategories]);
+
+    const activeCategories: ItemCategory[] = categoryFilter ? [categoryFilter] : visibleCategories;
     const liveRotationCountdown = useMemo(
         () => formatLiveCountdown(stock.meta.nextUpdateAt, nowMs),
         [stock.meta.nextUpdateAt, nowMs]
@@ -494,30 +508,32 @@ export default function GardenHorizonsStockNotifier() {
                         </div>
 
                         {/* Shop Tabs */}
-                        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide border-b border-border-subtle mt-2 pt-2 relative">
-                            {TABS.map(tab => {
-                                const isActive = categoryFilter === tab;
-                                return (
-                                    <button
-                                        key={tab}
-                                        onClick={() => setCategoryFilter(tab)}
-                                        className={`relative whitespace-nowrap flex items-center gap-2 px-5 py-3 rounded-t-xl text-sm font-bold transition-all ${isActive
-                                            ? 'text-text-primary'
-                                            : 'text-text-secondary hover:bg-surface-alt hover:text-text-primary'}`}
-                                    >
-                                        {isActive && (
-                                            <motion.div
-                                                layoutId="activeTabBadge"
-                                                className="absolute inset-0 bg-surface-alt shadow-[inset_0_-2px_0_0_#4ADE80] rounded-t-xl z-0"
-                                                transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                                            />
-                                        )}
-                                        <span className="relative z-10 text-lg opacity-80">{tab === "All" ? "🌍" : CATEGORY_CONFIG[tab].emoji}</span>
-                                        <span className="relative z-10">{tab}</span>
-                                    </button>
-                                );
-                            })}
-                        </div>
+                        {visibleCategories.length > 0 && (
+                            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide border-b border-border-subtle mt-2 pt-2 relative">
+                                {visibleCategories.map(tab => {
+                                    const isActive = categoryFilter === tab;
+                                    return (
+                                        <button
+                                            key={tab}
+                                            onClick={() => setCategoryFilter((current) => current === tab ? null : tab)}
+                                            className={`relative whitespace-nowrap flex items-center gap-2 px-5 py-3 rounded-t-xl text-sm font-bold transition-all ${isActive
+                                                ? 'text-text-primary'
+                                                : 'text-text-secondary hover:bg-surface-alt hover:text-text-primary'}`}
+                                        >
+                                            {isActive && (
+                                                <motion.div
+                                                    layoutId="activeTabBadge"
+                                                    className="absolute inset-0 bg-surface-alt shadow-[inset_0_-2px_0_0_#4ADE80] rounded-t-xl z-0"
+                                                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                                                />
+                                            )}
+                                            <span className="relative z-10 text-lg opacity-80">{CATEGORY_CONFIG[tab].emoji}</span>
+                                            <span className="relative z-10">{tab}</span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        )}
 
                         {/* Rarity Legend */}
                         <div className="px-2 pb-2">
@@ -553,6 +569,13 @@ export default function GardenHorizonsStockNotifier() {
                         )}
 
                         {/* Render Category Grids */}
+                        {!swrError && !isLoading && visibleCategories.length === 0 && (
+                            <div className="rounded-2xl border border-border-strong bg-surface/40 px-6 py-10 text-center shadow-xs">
+                                <p className="text-sm font-semibold text-text-primary">No live shop categories are available right now.</p>
+                                <p className="mt-2 text-xs text-text-muted">The tracker will show each shop again as soon as the upstream feed starts returning items for it.</p>
+                            </div>
+                        )}
+
                         {!swrError && !isLoading && (
                             <div className="space-y-12 mb-8">
                                 {activeCategories.map(cat => {
@@ -564,11 +587,11 @@ export default function GardenHorizonsStockNotifier() {
 
                                     return (
                                         <section key={cat} className="space-y-4 min-w-0">
-                                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-1">
-                                                <div className="flex items-center gap-3">
+                                            <div className="flex flex-col gap-3 px-1 xl:flex-row xl:items-center xl:justify-between">
+                                                <div className="flex min-w-0 flex-wrap items-center gap-3">
                                                     <span className="bg-surface border border-border-strong w-10 h-10 flex items-center justify-center rounded-xl text-xl shadow-xs">{CATEGORY_CONFIG[cat].emoji}</span>
-                                                    <div className="flex items-center gap-3">
-                                                        <h2 className="text-xl font-extrabold text-text-primary tracking-wide">{cat}</h2>
+                                                    <div className="flex min-w-0 flex-wrap items-center gap-3">
+                                                        <h2 className="shrink-0 text-xl font-extrabold text-text-primary tracking-wide">{cat}</h2>
                                                         <span className="rounded-full border border-accent/45 bg-accent-soft px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-accent shadow-[0_0_18px_rgba(74,222,128,0.14)]">
                                                             {totalQuantity} total stock
                                                         </span>
@@ -590,7 +613,7 @@ export default function GardenHorizonsStockNotifier() {
                                             </div>
 
                                             {items.length > 0 ? (
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3">
+                                                <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,18rem),1fr))] gap-3">
                                                     {items.map((item) => (
                                                         <StockCard
                                                             key={item.name}

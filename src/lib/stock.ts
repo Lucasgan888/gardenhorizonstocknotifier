@@ -103,8 +103,11 @@ export const CATEGORY_CONFIG: Record<ItemCategory, { emoji: string; color: strin
 const EMOJI_MAP: Record<string, string> = {
   "Uncommon Egg": "🐣", "Cactus": "🌵", "Tomato": "🍅",
   "Buttercup": "🌼", "Blueberry": "🫐", "Strawberry": "🍓", "Carrot": "🥕",
+  "Corn": "🌽", "Onion": "🧅", "Mushroom": "🍄", "Apple": "🍎",
+  "Banana": "🍌", "Plum": "🍑", "Potato": "🥔",
   "Harvest Tool": "🌾", "Favorite Tool": "❤️", "Pet Name Reroller": "📛",
   "Pet Lead": "🦮", "Recall Wrench": "🔧", "Trowel": "🛠️", "Trading Ticket": "🎫", "Watering Can": "🚿",
+  "Harvest Bell": "🔔", "Basic Sprinkler": "💦",
   "Beach Crate": "🏖️", "Summer Fun Crate": "🏄", "Cooking Kit": "🍳",
   "Stone Lantern": "🏮", "Viney Beam": "🌿", "Hay Bale": "🌾", "Brick Stack": "🧱",
   "Torch": "🔥", "White Bench": "🪑", "Safari Seed Pack": "🦁",
